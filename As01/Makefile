@@ -14,18 +14,21 @@ ifneq ($(SERIAL), 1)
 	CXX_FLAGS += $(PAR_FLAG)
 endif
 
-APPS = matmul transpose
+APPS = matmul_basic matmul_cuda transpose
 
 .PHONY: all
 
 all: $(APPS)
 
-matmul: matmul.c mmio.c
+matmul_cuda: matmul_cuda.cu mmio.cpp MatrixParser/matrixparser.cpp
+	nvcc -O3 -Xptxas -O3 -o $@ $^
+
+matmul_basic: matmul.cpp mmio.cpp MatrixParser/matrixparser.cpp
 	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -o $@ $^ $(LFLAGS)
 
-transpose: transpose.c mmio.c
+transpose: transpose.cpp mmio.cpp
 	$(CXX) $(CXX_FLAGS) $(GENERATE) -o $@ $^ $(LFLAGS)
 
 .PHONY: clean
 clean:
-	rm -f $(APPS)
+	rm -f $(APPS) *.o
