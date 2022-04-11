@@ -9,7 +9,7 @@
 #define M 512
 #define P 512
 
-#define REP 4
+#define REP 10
 
 void matrix_mult(int m, int n, int p, float *A, float *B, float *C)
 {
@@ -35,6 +35,7 @@ double get_operation_count(int m, int n, int p)
 
 int main(int argc, char **argv)
 {
+    omp_set_num_threads(16);
     float *A, *B, *C;
 #ifdef TIMING
     struct timeval before, after;
