@@ -34,7 +34,7 @@ void matrix_mult(int m, int n, int p, float *A, float *B, float *C)
 
 double get_operation_count(int m, int n, int p)
 {
-    return (double)m * n * p * 5 + (double)m * p * 4 + m * 2;
+    return (double)m * n * p * 2; // exclude overhead 5 + (double)m * p * 4 + m * 2;
 }
 
 void to_column_major(int n, int p, float *B) {
