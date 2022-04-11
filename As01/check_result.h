@@ -1,0 +1,1 @@
+void check_result(char* file_expected, char* file_actual, int m, int n, int nz);

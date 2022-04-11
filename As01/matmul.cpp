@@ -8,7 +8,7 @@
 #define M 512
 #define P 512
 
-#define REP 10
+#define REP 2
 
 void matrix_mult(int m, int n, int p, float *A, float *B, float *C)
 {

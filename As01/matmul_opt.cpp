@@ -2,31 +2,79 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include "mmio.h"
+#include "matmul.h"
+#include "check_result.h"
 #include "MatrixParser/matrixparser.h"
+
+#include <immintrin.h>
 
 #define N 512
 #define M 512
 #define P 512
 
-#define REP 10
+#define REP 2
 
-void matrix_mult(int m, int n, int p, float *A, float *B, float *C)
+void matrix_mult_optimised(int m, int n, int p, float *A, float *B, float *C)
 {
-    int i, j, k;
+    int i, j, k, in, jn;
+    float sum;
 
     for (i = 0; i < m; i++)
     {
         int ip = i * p;
         for (j = 0; j < p; j++)
         {
-            float sum = 0;
-            int in = i * n;
-            int jp = j * p;
+            sum = 0;
+            in = i * n;
+            jn = j * n;
+
             for (k = 0; k < n; k++)
             {
                 // Assumes A is stored row major while B is stored column major
-                sum += A[in + k] * B[jp + k];
+                sum += A[in + k] * B[jn + k];
             }
+            C[ip + j] = sum;
+        }
+    }
+}
+
+void matrix_mult_optimised_simd(int m, int n, int p, float *A, float *B, float *C)
+{
+    int REG_SIZE = 8; 
+    int i, j, k, in, jn;
+    float sum;
+    float buffer[8];
+    __m256 reg_a, reg_b, reg_res, reg_temp;
+
+    int first_remaining = n - (n % REG_SIZE);
+
+    for (i = 0; i < m; i++)
+    {
+        int ip = i * p;
+        for (j = 0; j < p; j++)
+        {
+            sum = 0;
+            reg_res = _mm256_set1_ps(0.0);
+            in = i * n;
+            jn = j * n;
+
+            for (k = 0; k < n / REG_SIZE; k++)
+            {
+                // Assumes A is stored row major while B is stored column major
+                reg_a = _mm256_loadu_ps(&A[in + k * REG_SIZE]);
+                reg_b = _mm256_loadu_ps(&B[jn + k * REG_SIZE]);
+                reg_temp = _mm256_mul_ps(reg_a, reg_b);
+                reg_res = _mm256_add_ps(reg_res, reg_temp);
+            }
+
+            //remaining part
+            for(int l = first_remaining; l < n; ++l){
+                sum += A[in + l] * B[jn + l];
+            }
+
+            _mm256_store_ps(buffer, reg_res);
+            sum += buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6] + buffer[7];
+
             C[ip + j] = sum;
         }
     }
@@ -37,7 +85,8 @@ double get_operation_count(int m, int n, int p)
     return (double)m * n * p * 2; // exclude overhead 5 + (double)m * p * 4 + m * 2;
 }
 
-void to_column_major(int n, int p, float *B) {
+void to_column_major(int n, int p, float *B)
+{
     float *Btmp = (float *)calloc(n * p, sizeof(float));
     if (Btmp == NULL)
     {
@@ -55,7 +104,7 @@ void to_column_major(int n, int p, float *B) {
 
 int main(int argc, char **argv)
 {
-    float *A, *B, *C;
+    float *A, *B, *B_tmp, *C;
 #ifdef TIMING
     struct timeval before, after;
 #endif
@@ -96,6 +145,12 @@ int main(int argc, char **argv)
         printf("Out of memory A! \n");
         exit(1);
     }
+    B_tmp = (float *)calloc(n * p, sizeof(float));
+    if (B_tmp == NULL)
+    {
+        printf("Out of memory B! \n");
+        exit(1);
+    }
     B = (float *)calloc(n * p, sizeof(float));
     if (B == NULL)
     {
@@ -111,14 +166,15 @@ int main(int argc, char **argv)
     else
         read_dense(fa, m, n, A);
     if (nzB > 0)
-        read_sparse(fb, n, p, nzB, B);
+        read_sparse(fb, n, p, nzB, B_tmp);
     else
-        read_dense(fb, n, p, B);
+        read_dense(fb, n, p, B_tmp);
     fclose(fa);
     fclose(fb);
 #endif
     // store B in column major
-    to_column_major(n, p, B);
+    // to_column_major(n, p, B);
+    transpose(n, p, B_tmp, B);
 
     C = (float *)calloc(m * p, sizeof(float));
     if (C == NULL)
@@ -136,10 +192,7 @@ int main(int argc, char **argv)
 #endif
 
     for (r = 0; r < REP; r++)
-        matrix_mult(m, n, p, A, B, C);
-
-        // for (r = 0; r < REP; r++)
-        //     cuda_do_compute(m, n, p, A, B, C);
+        matrix_mult_optimised(m, n, p, A, B, C);
 
 #ifdef TIMING
     gettimeofday(&after, NULL);
@@ -157,11 +210,12 @@ int main(int argc, char **argv)
 #else
     if ((fc = fopen(argv[3], "wt")) == NULL)
         exit(3);
+
+
 #endif
-    write_sparse(fc, m, p, C);
+    int nz = write_sparse(fc, m, p, C);
     fclose(fc);
     free(A);
     free(B);
     free(C);
-    // free(C2);
 }

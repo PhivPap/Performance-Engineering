@@ -7,6 +7,15 @@
 #define M 512
 #define P 512
 
+void transpose(int m, int n, float *A, float *B) {
+    int i, j;
+    for(i=0; i<m; i++) {
+        for(j=0; j<n; j++) {
+            B[i+j*m] = A[i*n+j];
+        }
+    }
+}
+
 void generate_mat(int m, int n, int p, float *A, float *B)
 {
     int i;
@@ -33,7 +42,7 @@ void read_sparse(FILE *f, int m, int n, int nz, float *A)
     }
 }
 
-void write_sparse(FILE *f, int m, int p, const float *C)
+int write_sparse(FILE *f, int m, int p, const float *C)
 {
     int i, nz = 0;
     MM_typecode matcode;
@@ -55,6 +64,8 @@ void write_sparse(FILE *f, int m, int p, const float *C)
         if (C[i] != 0.0)
             fprintf(f, "%d %d %f\n", i / p + 1, i % p + 1, C[i]);
     }
+
+    return nz;
 }
 
 void read_dense(FILE *f, int m, int n, float *A)
