@@ -29,7 +29,7 @@ void matrix_mult(int m, int n, int p, float *A, float *B, float *C)
 
 double get_operation_count(int m, int n, int p)
 {
-    return (double)m * n * p * 9 + (double)m * p * 3 + m;
+    return (double)m * n * p * 2; // exclude overhead 9 + (double)m * p * 3 + m;
 }
 
 int main(int argc, char **argv)
