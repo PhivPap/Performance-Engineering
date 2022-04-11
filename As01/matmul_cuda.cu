@@ -62,7 +62,7 @@ void gpu_memory_free(float *d_A, float *d_B, float *d_C){
 }
 
 double get_operation_count(int m, int n, int p){
-    return (double)m * n * p * 9;
+    return (double)m * n * p * 2; // exclude overhead like index computation and index increments 9;
 }
 
 void cuda_do_compute(int m, int n, int p, float *A, float *B, float *C)
