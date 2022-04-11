@@ -125,8 +125,8 @@ int main(int argc, char **argv)
     double avg_execution_time = ((after.tv_sec + (after.tv_usec / 1000000.0)) -
                                  (before.tv_sec + (before.tv_usec / 1000000.0))) /
                                 REP;
-    printf("OpenMP code: %10.2f GFLOP/s \n", flops / (10e9 * avg_execution_time));
-    printf("OpenMP code: %10.2f seconds \n", avg_execution_time);
+    printf("GFLOP/s: %f\n", flops / (10e9 * avg_execution_time));
+    printf("Seconds: %f\n", avg_execution_time);
 
 #endif
 

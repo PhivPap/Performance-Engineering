@@ -80,8 +80,8 @@ void cuda_do_compute(int m, int n, int p, float *A, float *B, float *C)
     const auto end = std::chrono::system_clock::now();
 
     const double avg_execution_time = (double)(end - start).count() / (double)10e9;
-    printf("Reference code: %10.2f GFLOP/s \n", get_operation_count(m, n, p) / (avg_execution_time * 10e9));
-    printf("Reference code: %10.2f seconds \n", avg_execution_time);
+    printf("GFLOP/s: %f\n", get_operation_count(m, n, p) / (avg_execution_time * 10e9));
+    printf("Seconds: %f\n", avg_execution_time);
     cudaMemcpy(C, d_C, sizeof(float) * p * m, cudaMemcpyDeviceToHost);
     gpu_memory_free(d_A, d_B, d_C);
 }
@@ -178,8 +178,8 @@ int main(int argc, char **argv)
     double avg_execution_time = ((after.tv_sec + (after.tv_usec / 1000000.0)) -
                                  (before.tv_sec + (before.tv_usec / 1000000.0))) /
                                 REP;
-    printf("Reference code: %10.2f GFLOP/s \n", flops / (10e9 * avg_execution_time));
-    printf("Reference code: %10.2f seconds \n", avg_execution_time);
+    printf("GFLOP/s: %f\n", flops / (10e9 * avg_execution_time));
+    printf("Seconds: %f\n", avg_execution_time);
 
 #endif
 

@@ -3,3 +3,12 @@ As01/transpose
 As01/matmul_basic
 As01/matmul_cuda
 As01/matmul_omp
+As01/matmul_basic.exe
+As01/matmul_opt.exe
+As01/matmul_omp.exe
+As01/output/ref_out_arc130.mtx
+As01/output/ref_out_bcspwr06.mtx
+As01/output/ref_out_bcsstk13.mtx
+As01/output/ref_out_G6.mtx
+As01/output/ref_out_tols1090.mtx
+As01/output/tmp.txt
