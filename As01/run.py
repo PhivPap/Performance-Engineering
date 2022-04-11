@@ -9,6 +9,8 @@ input_dir = "input/"
 output_dir = "output/"
 
 # LOGIC
+template_command = ["prun", "-np", "1"] if DAS else []
+
 for program in programs:
     print("Running", program)
     for matrix in matrices:
@@ -19,7 +21,7 @@ for program in programs:
         else:
             out_matrix_path = output_dir + "tmp.txt"
 
-        command = [("prun -np -1 " if DAS else "") + "./" + program, in_matrix_path, in_matrix_path, out_matrix_path]
+        command = template_command + ["./" + program, in_matrix_path, in_matrix_path, out_matrix_path]
         process = Popen(command, stdout=PIPE)
         process.wait()
         output_lines = process.stdout.readlines()
