@@ -1,3 +1,4 @@
+import filecmp
 from subprocess import Popen, PIPE
 
 # CONFIG
@@ -12,7 +13,7 @@ output_dir = "output/"
 template_command = ["prun", "-np", "1"] if DAS else []
 
 for program in programs:
-    print("Running", program)
+    print("Running:", program)
     for matrix in matrices:
         print("\tFile:", matrix)
         in_matrix_path = input_dir + matrix
@@ -29,7 +30,12 @@ for program in programs:
         last_line_idx = len(output_lines) - 1
         gflops = float(output_lines[last_line_idx - 1].split()[-1])
         exec_time = float(output_lines[last_line_idx].split()[-1])
+
+        
         print("\t\tGFLOP/s: ", gflops)
         print("\t\tSeconds: ", exec_time)
-
-        # TODO: check if the output is the same as the output produced by the reference program
+        if program != reference:
+            if filecmp.cmp(out_matrix_path, output_dir + "ref_out_" + matrix, shallow=False):
+                print("\t\tOutput: Correct")
+            else:
+                print("\t\tOutput: False")
