@@ -1,3 +1,4 @@
+import os
 import filecmp
 from subprocess import Popen, PIPE
 
@@ -11,6 +12,13 @@ output_dir = "output/"
 
 # LOGIC
 template_command = ["prun", "-np", "1"] if DAS else []
+
+try: 
+    # if output dir does not exist, create it..
+    os.mkdir(output_dir)
+    print(f"Created directory '{output_dir}'")
+except FileExistsError: 
+    pass
 
 for program in programs:
     print("Running:", program)
@@ -31,7 +39,6 @@ for program in programs:
         gflops = float(output_lines[last_line_idx - 1].split()[-1])
         exec_time = float(output_lines[last_line_idx].split()[-1])
 
-        
         print("\t\tGFLOP/s: ", gflops)
         print("\t\tSeconds: ", exec_time)
         if program != reference:
