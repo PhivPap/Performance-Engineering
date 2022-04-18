@@ -68,21 +68,33 @@ double get_operation_count(int m, int n, int p){
 void cuda_do_compute(int m, int n, int p, float *A, float *B, float *C)
 {
     float *d_A, *d_B, *d_C;
-    gpu_memory_init(m, n, p, A, B, C, &d_A, &d_B, &d_C);
     const uint32_t grid_height = m % BLOCK_HEIGHT == 0 ? m / BLOCK_HEIGHT : (m / BLOCK_HEIGHT) + 1;
     const uint32_t grid_width = p % BLOCK_WIDTH == 0 ? p / BLOCK_WIDTH : (p / BLOCK_WIDTH) + 1;
     dim3 grid(grid_width, grid_height);
     dim3 block(BLOCK_WIDTH, BLOCK_HEIGHT);
+    
+    float time;
+    cudaEvent_t start2, stop2;
+    gpu_memory_init(m, n, p, A, B, C, &d_A, &d_B, &d_C);
 
     const auto start = std::chrono::system_clock::now();
+    check( cudaEventCreate(&start2) );
+    check( cudaEventCreate(&stop2) );
+    check( cudaEventRecord(start2, 0) );
+
     matrix_mul<<<grid, block>>>(d_A, d_B, d_C, n, p, m);
     cudaDeviceSynchronize();
+    check( cudaEventRecord(stop2, 0) );
+    check( cudaEventSynchronize(stop2) );
+    check( cudaEventElapsedTime(&time, start2, stop2) );
     const auto end = std::chrono::system_clock::now();
-
-    const double avg_execution_time = (double)(end - start).count() / (double)10e9;
+    cudaMemcpy(C, d_C, sizeof(float) * p * m, cudaMemcpyDeviceToHost);
+    
+    using std::chrono::duration_cast;
+    using std::chrono::milliseconds;
+    const double avg_execution_time = duration_cast<milliseconds>(end - start).count() / 1000.0;
     printf("GFLOP/s: %f\n", get_operation_count(m, n, p) / (avg_execution_time * 10e9));
     printf("Seconds: %f\n", avg_execution_time);
-    cudaMemcpy(C, d_C, sizeof(float) * p * m, cudaMemcpyDeviceToHost);
     gpu_memory_free(d_A, d_B, d_C);
 }
 
@@ -168,7 +180,6 @@ int main(int argc, char **argv)
     gettimeofday(&before, NULL);
     
 #endif
-
 
     for (r = 0; r < REP; r++)
         cuda_do_compute(m, n, p, A, B, C);
