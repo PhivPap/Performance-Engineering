@@ -73,20 +73,12 @@ void cuda_do_compute(int m, int n, int p, float *A, float *B, float *C)
     dim3 grid(grid_width, grid_height);
     dim3 block(BLOCK_WIDTH, BLOCK_HEIGHT);
     
-    float time;
-    cudaEvent_t start2, stop2;
     gpu_memory_init(m, n, p, A, B, C, &d_A, &d_B, &d_C);
 
     const auto start = std::chrono::system_clock::now();
-    check( cudaEventCreate(&start2) );
-    check( cudaEventCreate(&stop2) );
-    check( cudaEventRecord(start2, 0) );
 
     matrix_mul<<<grid, block>>>(d_A, d_B, d_C, n, p, m);
     cudaDeviceSynchronize();
-    check( cudaEventRecord(stop2, 0) );
-    check( cudaEventSynchronize(stop2) );
-    check( cudaEventElapsedTime(&time, start2, stop2) );
     const auto end = std::chrono::system_clock::now();
     cudaMemcpy(C, d_C, sizeof(float) * p * m, cudaMemcpyDeviceToHost);
     
