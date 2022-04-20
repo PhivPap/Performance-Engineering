@@ -12,3 +12,14 @@ As01/output/ref_out_bcsstk13.mtx
 As01/output/ref_out_G6.mtx
 As01/output/ref_out_tols1090.mtx
 As01/output/tmp.txt
+As01/output/bcs6
+As01/output/bcs13
+As01/output/bcss13_all.mtx
+As01/output/G6_all.mtx
+As01/output/G6.mtx
+As01/output/G6out.mtx
+As01/output/help.txt
+As01/output/IAOut.mtx
+As01/output/IAout.txt
+As01/output/IntelAdvisorOut.mtx
+.vscode/settings.json
