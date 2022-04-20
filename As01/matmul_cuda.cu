@@ -89,7 +89,7 @@ void cuda_do_compute(int m, int n, int p, float *A, float *B, float *C)
     using std::chrono::duration_cast;
     using std::chrono::milliseconds;
     const double avg_execution_time = duration_cast<milliseconds>(end - start).count() / 1000.0 / REP;
-    printf("GFLOP/s: %f\n", get_operation_count(m, n, p) / (avg_execution_time * 10e9));
+    printf("GFLOP/s: %f\n", get_operation_count(m, n, p) / (avg_execution_time * 1e9));
     printf("Seconds: %f\n", avg_execution_time);
     gpu_memory_free(d_A, d_B, d_C);
 }
