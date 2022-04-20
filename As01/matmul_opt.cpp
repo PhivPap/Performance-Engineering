@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/time.h>
+#include <assert.h>
 #include "mmio.h"
-#include "matmul.h"
-#include "check_result.h"
 #include "MatrixParser/matrixparser.h"
 
 #include <immintrin.h>
@@ -12,39 +11,37 @@
 #define M 512
 #define P 512
 
-#define REP 2
+#define REP 5
 
-void matrix_mult_optimised(int m, int n, int p, float *A, float *B, float *C)
-{
+enum Version { OPT, OPT_SIMD, LOOP_TILING};
+enum Version version = OPT_SIMD;
+
+void matrix_mult_optimised(int m, int n, int p, float *A, float *B, float *C){
     int i, j, k, in, jn;
     float sum;
-
-    for (i = 0; i < m; i++)
-    {
+    for (i = 0; i < m; i++){
         int ip = i * p;
-        for (j = 0; j < p; j++)
-        {
+        for (j = 0; j < p; j++){
             sum = 0;
             in = i * n;
             jn = j * n;
 
             for (k = 0; k < n; k++)
-            {
-                // Assumes A is stored row major while B is stored column major
                 sum += A[in + k] * B[jn + k];
-            }
+                
             C[ip + j] = sum;
         }
     }
 }
 
+
 void matrix_mult_optimised_simd(int m, int n, int p, float *A, float *B, float *C)
 {
-    int REG_SIZE = 8; 
+    int REG_SIZE = 16; 
     int i, j, k, in, jn;
     float sum;
-    float buffer[8];
-    __m256 reg_a, reg_b, reg_res, reg_temp;
+    float buffer[16];
+    __m512 reg_a, reg_b, reg_res, reg_temp;
 
     int first_remaining = n - (n % REG_SIZE);
 
@@ -54,17 +51,17 @@ void matrix_mult_optimised_simd(int m, int n, int p, float *A, float *B, float *
         for (j = 0; j < p; j++)
         {
             sum = 0;
-            reg_res = _mm256_set1_ps(0.0);
+            reg_res = _mm512_set1_ps(0.0);
             in = i * n;
             jn = j * n;
 
             for (k = 0; k < n / REG_SIZE; k++)
             {
                 // Assumes A is stored row major while B is stored column major
-                reg_a = _mm256_loadu_ps(&A[in + k * REG_SIZE]);
-                reg_b = _mm256_loadu_ps(&B[jn + k * REG_SIZE]);
-                reg_temp = _mm256_mul_ps(reg_a, reg_b);
-                reg_res = _mm256_add_ps(reg_res, reg_temp);
+                reg_a = _mm512_loadu_ps(&A[in + k * REG_SIZE]);
+                reg_b = _mm512_loadu_ps(&B[jn + k * REG_SIZE]);
+                reg_temp = _mm512_mul_ps(reg_a, reg_b);
+                reg_res = _mm512_add_ps(reg_res, reg_temp);
             }
 
             //remaining part
@@ -72,17 +69,71 @@ void matrix_mult_optimised_simd(int m, int n, int p, float *A, float *B, float *
                 sum += A[in + l] * B[jn + l];
             }
 
-            _mm256_store_ps(buffer, reg_res);
-            sum += buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6] + buffer[7];
+            _mm512_store_ps(buffer, reg_res);
+            sum += buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6] + buffer[7] +
+                buffer[8] + buffer[9] + buffer[10] + buffer[11] + buffer[12] + buffer[13] + buffer[14] + buffer[15];
 
             C[ip + j] = sum;
         }
     }
 }
 
+// m = rows of C and rows of A
+// p = colums of C and colums of B
+// n = colums of A and rows of B
+// MATRIX = [ROWS][COLUMS]
+// A = [m][n]
+// B = [n][p]
+// C = [m][p]
+void matrix_mult_optimised_loop_tiling(int m, int n, int p, float *A, float *B, float *C)
+{
+    int i, j, k, ii, kk;
+    int ib = 2, kb = 2;
+    float acc00, acc01, acc10, acc11;
+
+    for (ii = 0; ii < m; ii += ib)
+    {
+        for (kk = 0; kk < p; kk += kb)
+        {
+            for (j=0; j < n; j += 2)
+            {
+                for (i = ii; i < ii + ib; i += 2)
+                {
+                    if (kk == 0)
+                        acc00 = acc01 = acc10 = acc11 = 0;
+                    else
+                    {
+                        acc00 = C[i * p + j];
+                        acc01 = C[i * p + j + 1];
+                        acc10 = C[(i + 1) * p + j];
+                        acc11 = C[(i + 1) * p + j + 1];
+                    }
+                    for (k = kk; k < kk + kb; k++)
+                    {
+                        acc00 += B[k * p + j]       * A[i * n + k];
+                        acc01 += B[k * p + j + 1]   * A[i * n + k];
+                        acc10 += B[k * p + j]       * A[(i + 1) * n + k];
+                        acc11 += B[k * p + j + 1]   * A[(i + 1) * n + k];
+                    }
+                    C[i * p + j] = acc00;
+                    C[i * p + j + 1] = acc01;
+                    C[(i + 1) * p + j] = acc10;
+                    C[(i + 1) * p + j + 1] = acc11;
+                }
+            }
+        }
+    }
+}
+
 double get_operation_count(int m, int n, int p)
 {
-    return (double)m * n * p * 2; // exclude overhead 5 + (double)m * p * 4 + m * 2;
+    switch (version){
+        case OPT:           return (double)m * n * p * 2;
+        case OPT_SIMD:      return (double)m * n * p * 2;
+        case LOOP_TILING:   return (double)m * n * p * 2;
+        default:            assert(0); 
+    }
+    return 0;
 }
 
 void to_column_major(int n, int p, float *B)
@@ -172,9 +223,16 @@ int main(int argc, char **argv)
     fclose(fa);
     fclose(fb);
 #endif
-    // store B in column major
-    // to_column_major(n, p, B);
-    transpose(n, p, B_tmp, B);
+
+    switch (version){
+        case OPT:
+        case OPT_SIMD: {
+            transpose(n, p, B_tmp, B);
+            break;
+        }
+        default: assert(0);
+    }
+
 
     C = (float *)calloc(m * p, sizeof(float));
     if (C == NULL)
@@ -191,15 +249,34 @@ int main(int argc, char **argv)
     gettimeofday(&before, NULL);
 #endif
 
-    for (r = 0; r < REP; r++)
-        matrix_mult_optimised(m, n, p, A, B, C);
+    switch (version){
+        case OPT: {
+            for (r = 0; r < REP; r++)
+                matrix_mult_optimised(m, n, p, A, B, C);
+            break;
+        }
+
+        case OPT_SIMD: {
+            for (r = 0; r < REP; r++)
+                matrix_mult_optimised_simd(m, n, p, A, B, C);
+            break;
+        }
+
+        case LOOP_TILING: {
+            for (r = 0; r < REP; r++)
+                matrix_mult_optimised_loop_tiling(m, n, p, A, B_tmp, C);
+            break;
+        }
+    
+        default: assert(0);
+    }
 
 #ifdef TIMING
     gettimeofday(&after, NULL);
     double avg_execution_time = ((after.tv_sec + (after.tv_usec / 1000000.0)) -
                                  (before.tv_sec + (before.tv_usec / 1000000.0))) /
                                 REP;
-    printf("GFLOP/s: %f\n", flops / (10e9 * avg_execution_time));
+    printf("GFLOP/s: %f\n", flops / (1e9 * avg_execution_time));
     printf("Seconds: %f\n", avg_execution_time);
 
 #endif

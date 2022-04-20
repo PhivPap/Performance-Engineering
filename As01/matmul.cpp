@@ -8,8 +8,16 @@
 #define M 512
 #define P 512
 
-#define REP 2
+#define REP 5
 
+
+// m = rows of C and rows of A
+// p = colums of C and colums of B
+// n = colums of A and rows of B
+// MATRIX = [ROWS][COLUMS]
+// A = [m][n]
+// B = [n][p]
+// C = [m][p]
 void matrix_mult(int m, int n, int p, float *A, float *B, float *C)
 {
     int i, j, k;
@@ -26,6 +34,7 @@ void matrix_mult(int m, int n, int p, float *A, float *B, float *C)
         }
     }
 }
+
 
 double get_operation_count(int m, int n, int p)
 {
@@ -123,7 +132,7 @@ int main(int argc, char **argv)
     double avg_execution_time = ((after.tv_sec + (after.tv_usec / 1000000.0)) -
                                  (before.tv_sec + (before.tv_usec / 1000000.0))) /
                                 REP;
-    printf("GFLOP/s: %f\n", flops / (10e9 * avg_execution_time));
+    printf("GFLOP/s: %f\n", (flops / (avg_execution_time)) / 1e9);
     printf("Seconds: %f\n", avg_execution_time);
 
 #endif
