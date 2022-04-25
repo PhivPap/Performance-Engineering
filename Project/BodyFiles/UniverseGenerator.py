@@ -4,9 +4,9 @@ from typing import Dict
 
 # CFG
 universe_file = "in/in0.tsv"
-bodies = 1000
-universe = ((0, 1e50), (0, 1e50))           # m (x, y)
-mass_range = (1e10, 1e50)                   # kg
+bodies = 10000
+universe = ((-1e13, 1e13), (-1e13, 1e13))   # m (x, y)
+mass_range = (1e10, 1e40)                   # kg
 vel_range = (-1e6, 1e6)                     # m / s
 
 # LOGIC

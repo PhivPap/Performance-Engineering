@@ -7,6 +7,7 @@ IO::Writer::Writer(const std::string &path){
         failed = true;
         throw std::string("Unable to open output file at: '" + path + "'.");
     }
+    output_file << "id\tmass\tx\ty\tvel_x\tvel_y\n";
 }
 
 IO::Writer::~Writer(void){

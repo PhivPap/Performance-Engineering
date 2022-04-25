@@ -51,7 +51,7 @@ int IO::Parser::next_body_info(IO::Body &io_body_ref){
                                     + std::to_string(tokens.size()) + " tokens.");
             
         try {
-            io_body_ref.id = tokens[0];
+            io_body_ref.id = std::stoi(tokens[0]);
             io_body_ref.mass = std::stod(tokens[1]);
             io_body_ref.x = std::stod(tokens[2]);
             io_body_ref.y = std::stod(tokens[3]);

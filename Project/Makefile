@@ -1,5 +1,5 @@
 .SECONDEXPANSION:
-CXX_FLAGS = -std=c++17 -O3 -g
+CXX_FLAGS = -std=c++17 -O3
 
 DEPS = InputOutput/IOBody.cpp InputOutput/Parser.cpp InputOutput/Writer.cpp
 APPS = naive # bh_naive opt0 opt1 opt2 ...

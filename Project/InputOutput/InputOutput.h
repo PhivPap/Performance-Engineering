@@ -8,10 +8,10 @@
 namespace IO {
     class Body {
     public:
-        std::string id;
+        uint32_t id;
         double mass, x, y, vel_x, vel_y;
         Body(void);
-        Body(const std::string &id, double mass, double x, double y, double vel_x, double vel_y);
+        Body(uint32_t id, double mass, double x, double y, double vel_x, double vel_y);
         void copy_from(const Body &b);
     };
 
