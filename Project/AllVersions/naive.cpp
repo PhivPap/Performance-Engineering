@@ -6,9 +6,9 @@
 
 const std::string DEF_IN = "BodyFiles/in/in0.tsv";
 const std::string DEF_OUT = "BodyFiles/out/out0.tsv";
-const double G = 6.67e-11;
-const uint32_t total_time_steps = 50;     // 50 hours
-const double time_step_length = 3600;     // 1 hour
+const double G = 6.67e-11;                              // Gravitational constant
+const uint32_t total_time_steps = 50;                   // 50 hours
+const double time_step_length = 3600;                   // 1 hour
 
 struct Body {
     double mass, x, y, vel_x, vel_y;
@@ -72,7 +72,6 @@ void update_body_velocities(Body *bodies, uint32_t body_count, double time_step)
     }
 }
 
-
 void simulate(Body *bodies, uint32_t body_count, double time_step, uint32_t iterations){
     for (uint32_t i = 0; i < iterations; i++){
         update_body_positions(bodies, body_count, time_step);
@@ -82,13 +81,7 @@ void simulate(Body *bodies, uint32_t body_count, double time_step, uint32_t iter
 
 int main(int argc, const char **argv){
     std::vector<Body> bodies;
-    try {
-        parse_input(DEF_IN, bodies);
-    }
-    catch (const std::string &e) {
-        std::cout << e << std::endl;
-        exit(1);
-    }
+    parse_input(DEF_IN, bodies);
 
     const auto start = std::chrono::system_clock::now();
     simulate(bodies.data(), bodies.size(), time_step_length, total_time_steps);
@@ -96,10 +89,5 @@ int main(int argc, const char **argv){
     const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() / 1e9;
     std::cout << "Seconds: "  << elapsed << std::endl;
     
-    try {
-        write_output(DEF_OUT, bodies);
-    }
-    catch (const std::string &e) {
-        std::cout << e << std::endl;
-    }
+    write_output(DEF_OUT, bodies);
 }
