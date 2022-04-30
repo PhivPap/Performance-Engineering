@@ -24,3 +24,5 @@ As01/output/IAout.txt
 As01/output/IntelAdvisorOut.mtx
 .vscode/settings.json
 Project/naive.exe
+As02/Histo/histo_atomic.exe
+.editorconfig
