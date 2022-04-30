@@ -1,5 +1,5 @@
 .SECONDEXPANSION:
-CXX_FLAGS = -std=c++17 -O3
+CXX_FLAGS = -std=c++17 -O3 -pthread
 
 DEPS = 
 APPS = histo_atomic # histo_no_atomic ...
