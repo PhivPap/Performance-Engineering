@@ -2,8 +2,7 @@
 CXX_FLAGS = -std=c++17 -O3 -pthread
 
 DEPS = 
-APPS = histo_atomic # histo_no_atomic ...
-
+APPS = histo_per_thread histo_atomic
 
 all: $(APPS)
 
