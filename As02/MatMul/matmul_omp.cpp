@@ -21,7 +21,7 @@ double matrix_mult_omp_simd(int m, int n, int p, float *A, float *B, float *C)
     int i, j, k, in, jn;
     float sum;
     float buffers[THREAD_COUNT][16];
-    __m512 reg_a, reg_b, reg_res, reg_temp;
+    __m256 reg_a, reg_b, reg_res, reg_temp;
 
     int first_remaining = n - (n % REG_SIZE);
 
@@ -44,16 +44,16 @@ double matrix_mult_omp_simd(int m, int n, int p, float *A, float *B, float *C)
             for (j = 0; j < p; j++)
             {
                 sum = 0;
-                reg_res = _mm512_set1_ps(0.0);
+                reg_res = _mm256_set1_ps(0.0);
                 in = i * n;
                 jn = j * n;
 
                 for (k = 0; k < n / REG_SIZE; k++)
                 {
                     // Assumes A is stored row major while B is stored column major
-                    reg_a = _mm512_loadu_ps(&A[in + k * REG_SIZE]);
-                    reg_b = _mm512_loadu_ps(&B[jn + k * REG_SIZE]);
-                    reg_res = _mm512_fmadd_ps(reg_a, reg_b, reg_res);
+                    reg_a = _mm256_loadu_ps(&A[in + k * REG_SIZE]);
+                    reg_b = _mm256_loadu_ps(&B[jn + k * REG_SIZE]);
+                    reg_res = _mm256_fmadd_ps(reg_a, reg_b, reg_res);
                 }
 
                 //remaining part
@@ -61,7 +61,7 @@ double matrix_mult_omp_simd(int m, int n, int p, float *A, float *B, float *C)
                     sum += A[in + l] * B[jn + l];
                 }
 
-                _mm512_store_ps(buffer, reg_res);
+                _mm256_store_ps(buffer, reg_res);
                 sum += buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[5] + buffer[6] + buffer[7] +
                     buffer[8] + buffer[9] + buffer[10] + buffer[11] + buffer[12] + buffer[13] + buffer[14] + buffer[15];
 
