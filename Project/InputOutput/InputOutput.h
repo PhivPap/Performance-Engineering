@@ -12,15 +12,15 @@ namespace IO {
         double mass, x, y, vel_x, vel_y;
         Body(void);
         Body(uint32_t id, double mass, double x, double y, double vel_x, double vel_y);
-        void copy_from(const Body &b);
+        void copy_from(const Body& b);
     };
 
 
-    class Parser {  
+    class Parser {
     public:
-        Parser(const std::string &path);
+        Parser(const std::string& path);
         ~Parser(void);
-        int next_body_info(Body &io_body);
+        int next_body_info(Body& io_body);
 
     private:
         bool failed = false;
@@ -31,7 +31,7 @@ namespace IO {
 
     class Writer {
     public:
-        Writer(const std::string &path);
+        Writer(const std::string& path);
         ~Writer(void);
         void write_body(const Body& io_body);
 

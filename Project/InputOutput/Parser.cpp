@@ -5,7 +5,7 @@
 #include <iostream>
 
 
-IO::Parser::Parser(const std::string &path){
+IO::Parser::Parser(const std::string& path){
     std::string line, id;
     double mass, x, y, vel_x, vel_y;
     input_file = std::ifstream(path);
@@ -27,7 +27,7 @@ IO::Parser::~Parser(void){
 }
 
 // code from: https://stackoverflow.com/questions/1120140/how-can-i-read-and-parse-csv-files-in-c
-static std::vector<std::string> tokenize_string(const std::string &str, char delim){
+static std::vector<std::string> tokenize_string(const std::string& str, char delim){
     std::vector<std::string> tokens;
     std::stringstream str_stream(str);
     std::string token;
@@ -39,7 +39,7 @@ static std::vector<std::string> tokenize_string(const std::string &str, char del
 }
 
 // returns 1 if all parsed bodies were already copied, otherwise 0.
-int IO::Parser::next_body_info(IO::Body &io_body_ref){
+int IO::Parser::next_body_info(IO::Body& io_body_ref){
     std::string line;
     if (failed)
         throw std::string("Parser failed.");
@@ -47,9 +47,9 @@ int IO::Parser::next_body_info(IO::Body &io_body_ref){
     if (getline(input_file, line)){
         const auto tokens = tokenize_string(line, '\t');
         if (tokens.size() != 6)
-            throw std::string("Body " + std::to_string(parsed_bodies) + " has " 
-                                    + std::to_string(tokens.size()) + " tokens.");
-            
+            throw std::string("Body " + std::to_string(parsed_bodies) + " has "
+                + std::to_string(tokens.size()) + " tokens.");
+
         try {
             io_body_ref.id = std::stoi(tokens[0]);
             io_body_ref.mass = std::stod(tokens[1]);
