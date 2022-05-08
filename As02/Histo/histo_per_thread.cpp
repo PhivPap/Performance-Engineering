@@ -27,24 +27,41 @@ void* update_histogram(void* thread_args){
     struct args* args = (struct args*)thread_args;
     int start = args->start, end = args->start + args->length;
     int* image = args->image, * histogram = args->histogram;
+    int* local_histogram = (int*)calloc(BIN_COUNT, sizeof(int));
 
     for (int i = start; i < end; ++i)
-        __sync_fetch_and_add(&histogram[image[i]], 1);
+        local_histogram[image[i]] += 1;
 
+    for (int i = 0; i < BIN_COUNT; ++i) {
+        int local_value = local_histogram[i];
+        if (local_value)
+            __sync_fetch_and_add(&histogram[i], local_value);
+    }
     return NULL;
 }
 /*  Analytical Model (Including loop counters - excluding pointer arithmetics):
 
     Given N is the number of elements computed per thread (N = end - start):
 
-    T = Tcomp + Tmem + Tcomm
+        T = Tcomp + Tmem + Tcomm
 
-    Tcomp = int_add   * [2N]
-            
-    Tmem  = int_load  * [2N] +
-            int_store * [N]
+        Tcomp = int_add   * [2N + 512]
+                
+        Tmem  = int_load  * [2N + 512] +
+                int_store * [N + 256]
 
-    Tcomm = atomic_op * [N]
+        Tcomm = atomic_op * [256]
+
+
+
+    
+    Version 2:
+
+        T = loop1 + loop2
+
+        loop1 = N * [(2 * int_load) + (2 * int_add) + (1 * int_store)]
+
+        loop2 = 256 * [(2 * int_load) + (1 * int_add) + (1 * int_store) + (1 * atomic)]
 */
 
 void generate_image(int num_rows, int num_cols, int* image){
