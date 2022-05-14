@@ -18,7 +18,7 @@ struct Body {
 
 void parse_input(const std::string& input_path, std::vector<Body>& bodies){
     try {
-        auto parser = IO::Parser(input_path);
+        IO::Parser parser(input_path);
         auto io_body = IO::Body();
         while (parser.next_body_info(io_body) == 0)
             bodies.push_back(Body{ io_body.mass, io_body.x, io_body.y, io_body.vel_x, io_body.vel_y });
@@ -31,7 +31,7 @@ void parse_input(const std::string& input_path, std::vector<Body>& bodies){
 
 void write_output(const std::string& output_path, std::vector<Body>& bodies){
     try {
-        auto writer = IO::Writer(output_path);
+        IO::Writer writer(output_path);
         uint32_t id = 0;
         for (const auto& body : bodies)
             writer.write_body(IO::Body(id++, body.mass, body.x, body.y, body.vel_x, body.vel_y));

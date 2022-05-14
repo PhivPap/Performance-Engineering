@@ -18,6 +18,7 @@ namespace IO {
 
     class Parser {
     public:
+        Parser(void) = delete;
         Parser(const std::string& path);
         ~Parser(void);
         int next_body_info(Body& io_body);
