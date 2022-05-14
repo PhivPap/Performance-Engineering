@@ -1,6 +1,6 @@
 # See LICENSE.txt for license details.
 
-CXX_FLAGS += -std=c++11 -g -O3 -march=native
+CXX_FLAGS += -std=c++11 -g -O1 -march=native
 PAR_FLAG = -fopenmp
 #GENERATE = -D GENERATE
 GENERATE = 
