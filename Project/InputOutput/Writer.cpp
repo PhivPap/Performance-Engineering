@@ -1,7 +1,7 @@
 #include "InputOutput.h"
 #include <fstream>
 
-IO::Writer::Writer(const std::string &path){
+IO::Writer::Writer(const std::string& path){
     output_file = std::ofstream(path);
     if (!output_file.is_open()) {
         failed = true;
@@ -18,11 +18,11 @@ IO::Writer::~Writer(void){
 void IO::Writer::write_body(const IO::Body& io_body){
     if (failed)
         throw std::string("Writer failed.");
-    output_file << io_body.id << '\t' 
-                << io_body.mass << '\t'
-                << io_body.x << '\t'
-                << io_body.y << '\t'
-                << io_body.vel_x << '\t'
-                << io_body.vel_y << '\t'
-                << std::endl;
+    output_file << io_body.id << '\t'
+        << io_body.mass << '\t'
+        << io_body.x << '\t'
+        << io_body.y << '\t'
+        << io_body.vel_x << '\t'
+        << io_body.vel_y << '\t'
+        << std::endl;
 }
