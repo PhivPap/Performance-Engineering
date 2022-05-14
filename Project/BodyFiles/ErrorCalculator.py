@@ -1,8 +1,7 @@
 import csv
-from math import trunc
 
 # CFG
-reference_filepath = "out/out0.tsv"
+reference_filepath = "out/naive_out.tsv"
 approx_filepath = "out/bh_naive_out.tsv"
 
 # LOGIC
@@ -10,9 +9,9 @@ def parse_bodies(filepath):
     bodies = []
     with open(filepath) as fd:
         rd = csv.reader(fd, delimiter="\t", quotechar='"')
-        next(rd)
+        next(rd) # skips tsv header row
         for row in rd:
-            body = [float(row[1]), float(row[2]), float(row[3]), float(row[4]), float(row[5])]
+            body = [float(attr) for attr in row[1:6]]
             bodies.append(body)
     return bodies
 
@@ -34,7 +33,18 @@ avg_p_error_prcnt = avg_v_error_prcnt = 0
 for i in range(ref_b_count):
     ref_body = ref_bodies[i]
     approx_body = approx_bodies[i]
-    assert(ref_body[0] == approx_body[0])  # if masses are not the same: problem
+
+    # Take a look below. vvvvvvvvvvvvvvvv
+    # ref_body[0] - approx_body[0] - mass
+    # ref_body[1] - approx_body[1] - x
+    # ref_body[2] - approx_body[2] - y
+    # ref_body[3] - approx_body[3] - vel_x
+    # ref_body[4] - approx_body[4] - vel_y
+    # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    if(ref_body[0] != approx_body[0]):  # if masses are not the same: problem :)
+        print("Body mass does not match. Bye!")
+        exit(1)
     
     x_diff = ref_body[1] - approx_body[1]
     y_diff = ref_body[2] - approx_body[2]

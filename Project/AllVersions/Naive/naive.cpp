@@ -5,7 +5,7 @@
 #include "../../InputOutput/InputOutput.h"
 
 const std::string DEF_IN = "BodyFiles/in/in0.tsv";
-const std::string DEF_OUT = "BodyFiles/out/out0.tsv";
+const std::string DEF_OUT = "BodyFiles/out/naive_out.tsv";
 const double G = 6.67e-11;                              // Gravitational constant
 const uint32_t total_time_steps = 10;                   // 50 hours
 const double time_step_length = 1;                   // 1 hour

@@ -16,7 +16,7 @@ const double G = 6.67e-11;                              // Gravitational constan
 const uint32_t total_time_steps = 10;                   // 50 hours
 const double time_step_length = 1;                      // 1 hour
 const double UNIVERSE_LEN = 2e13;
-const double theta = 0.0;
+const double theta = 1.0;
 
 
 void parse_input(const std::string& input_path, std::vector<Body>& bodies){
@@ -68,15 +68,15 @@ void compute_body2body_attraction(const Body* body1, const Body* body2, double& 
         return;
     const double distance = body1->coords.distance_to(body2->coords);
     const double F = (G * body1->mass * body2->mass) / (distance * distance);
-    Fx += F * (body2->coords.x - body1->coords.x) / distance;
-    Fy += F * (body2->coords.y - body1->coords.y) / distance;
+    Fx += (F * (body2->coords.x - body1->coords.x)) / distance;
+    Fy += (F * (body2->coords.y - body1->coords.y)) / distance;
 }
 
 void compute_body2quad_attraction(const Body* body, const Quad* quad, double& Fx, double& Fy) {
     const double distance = body->coords.distance_to(quad->center_of_mass);
     const double F = (G * body->mass * quad->mass) / (distance * distance);
-    Fx += F * (quad->center_of_mass.x - body->coords.x) / distance;
-    Fy += F * (quad->center_of_mass.y - body->coords.y) / distance;
+    Fx += (F * (quad->center_of_mass.x - body->coords.x)) / distance;
+    Fy += (F * (quad->center_of_mass.y - body->coords.y)) / distance;
 }
 
 void compute_body_forces(Quad* quad, Body* body, double& Fx, double& Fy){
@@ -122,9 +122,8 @@ void simulate(Body* bodies, uint32_t body_count, double time_step, uint32_t iter
         Area area = update_body_positions_and_get_area(bodies, body_count, time_step);
         // for (uint32_t j = 0; j < body_count; j++)
         //     bodies[j].print();
-        Quad* root = new Quad(bodies, body_count, area);
-        update_body_velocities(root, bodies, body_count, time_step);
-        delete root;
+        Quad root(bodies, body_count, area);
+        update_body_velocities(&root, bodies, body_count, time_step);
     }
 }
 
