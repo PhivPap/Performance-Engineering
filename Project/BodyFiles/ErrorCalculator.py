@@ -22,7 +22,7 @@ ref_b_count = len(ref_bodies)
 apx_b_count = len(approx_bodies)
 
 if ref_b_count != apx_b_count:
-    print(f"rip -> {ref_b_count} ref bodies VS {apx_b_count} approx bodies.")
+    print("rip ->", ref_b_count, "ref bodies VS", apx_b_count, "approx bodies.")
     exit(1)
 
 invalid_bodies = 0
@@ -95,7 +95,7 @@ max_vel_x_error_prcnt = round(max_vel_x_error_prcnt, 2)
 max_vel_y_error_prcnt = round(max_vel_y_error_prcnt, 2)
 
 
-print(f"\nInvalid bodies (error > 1% ): {invalid_bodies}\n")
-print(f"AVG ERROR (%):\n  Position: [x]{avg_x_error_prcnt}%, [y]{avg_y_error_prcnt}%\n  Velocity: [x]{avg_vel_x_error_prcnt}%, [y]{avg_vel_y_error_prcnt}%\n")
-print(f"MAX ERROR (%):\n  Position: [x]{max_x_error_prcnt}% (body: {max_x_error_body}), [y]{max_y_error_prcnt}% (body: {max_y_error_body})")
-print(f"  Velocity: [x]{max_vel_x_error_prcnt}% (body: {max_vel_x_error_body}), [y]{max_vel_y_error_prcnt}% (body: {max_vel_y_error_body})\n")
+print("\nInvalid bodies (error > 1% ):", invalid_bodies, "\n")
+print("AVG ERROR (%):\n  Position: [x]", avg_x_error_prcnt, "%, [y]", avg_y_error_prcnt, "%\nVelocity: [x]", avg_vel_x_error_prcnt, "%, [y]", avg_vel_y_error_prcnt, "%\n")
+print("MAX ERROR (%):\n  Position: [x]", max_x_error_prcnt, "% (body: ",  max_x_error_body, "), [y]" ,max_y_error_prcnt, "% (body: ", max_y_error_body, ")")
+print("Velocity: [x]", max_vel_x_error_prcnt, "% (body: ",max_vel_x_error_body, "), [y]", max_vel_y_error_prcnt, "% (body: ", max_vel_y_error_body, ")\n")

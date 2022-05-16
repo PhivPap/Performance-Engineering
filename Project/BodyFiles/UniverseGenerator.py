@@ -1,9 +1,8 @@
 import random
-from typing import Dict
 
 
 # CFG
-universe_file = "in/in0.tsv"
+universe_file = "in/in10000.tsv"
 bodies = 10000
 universe = ((-1e13, 1e13), (-1e13, 1e13))   # m (x, y)
 mass_range = (1e10, 1e40)                   # kg

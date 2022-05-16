@@ -11,11 +11,11 @@
 #include "float.h"
 
 const std::string DEF_IN = "BodyFiles/in/def_in.tsv";
-const std::string DEF_OUT = "BodyFiles/out/bh_naive_out.tsv";
+const std::string DEF_OUT = "BodyFiles/out/bh_naive_out_005.tsv";
 const double G = 6.67e-11;                              // Gravitational constant
 const uint32_t total_time_steps = 50;                   // 50 hours
 const double time_step_length = 3600;                   // 1 hour
-const double theta = 0.4;
+const double theta = 0.05;
 
 
 void parse_input(const std::string& input_path, std::vector<Body>& bodies){
@@ -115,9 +115,9 @@ void update_body_velocities(Quad* root, Body* bodies, uint32_t body_count, doubl
 
 void simulate(Body* bodies, uint32_t body_count, double time_step, uint32_t iterations){
     for (int i = 0; i < iterations; i++) {
-        std::cout << "iteration: " << i;
+        // std::cout << "iteration: " << i;
         Area area = update_body_positions_and_get_area(bodies, body_count, time_step);
-        std::cout << ", universe diag: " << area.diagonal_length() << std::endl;
+        // std::cout << ", universe diag: " << area.diagonal_length() << std::endl;
         Quad root(bodies, body_count, area);
         update_body_velocities(&root, bodies, body_count, time_step);
     }
