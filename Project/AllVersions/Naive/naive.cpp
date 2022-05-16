@@ -4,7 +4,7 @@
 #include <math.h>
 #include "../../InputOutput/InputOutput.h"
 
-const std::string DEF_IN = "BodyFiles/in/in0.tsv";
+const std::string DEF_IN = "BodyFiles/in/def_in.tsv";
 const std::string DEF_OUT = "BodyFiles/out/naive_out.tsv";
 const double G = 6.67e-11;                              // Gravitational constant
 const uint32_t total_time_steps = 50;                   // 50 hours
@@ -77,10 +77,6 @@ void simulate(Body* bodies, uint32_t body_count, double time_step, uint32_t iter
         std::cout << "iteration " << i << std::endl;
         
         update_body_positions(bodies, body_count, time_step);
-        // for (uint32_t j = 0; j < body_count; j++){
-        //     Body& b = bodies[j];
-        //     std::cout << "mass: " << b.mass << ", x: " << b.x << ", y: " << b.y << ", vel_x: " << b.vel_x << ", vel_y: " << b.vel_y << std::endl; 
-        // }
         update_body_velocities(bodies, body_count, time_step);
     }
 }

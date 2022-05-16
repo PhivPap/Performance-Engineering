@@ -26,9 +26,12 @@ if ref_b_count != apx_b_count:
     exit(1)
 
 invalid_bodies = 0
-max_p_error_body = max_v_error_body = -1
-max_p_error_prcnt = max_v_error_prcnt = 0
-avg_p_error_prcnt = avg_v_error_prcnt = 0
+max_x_error_body = max_y_error_body = max_vel_y_error_body = max_vel_x_error_body = -1
+max_x_error_prcnt = max_y_error_prcnt = max_vel_y_error_prcnt = max_vel_x_error_prcnt = 0
+avg_x_error_prcnt = avg_y_error_prcnt = avg_vel_y_error_prcnt = avg_vel_x_error_prcnt = 0
+
+# max_p_error_prcnt = max_v_error_prcnt = 0
+# avg_p_error_prcnt = avg_v_error_prcnt = 0
 
 for i in range(ref_b_count):
     ref_body = ref_bodies[i]
@@ -56,36 +59,43 @@ for i in range(ref_b_count):
     vel_x_error_prcnt = abs(vel_x_diff /  ref_body[3]) * 100
     vel_y_error_prcnt = abs(vel_y_diff /  ref_body[4]) * 100
 
-    if x_error_prcnt > max_p_error_prcnt:
-        max_p_error_prcnt = x_error_prcnt
-        max_p_error_body = i
+    if x_error_prcnt > max_x_error_prcnt:
+        max_x_error_prcnt = x_error_prcnt
+        max_x_error_body = i
 
-    if y_error_prcnt > max_p_error_prcnt:
-        max_p_error_prcnt = y_error_prcnt
-        max_p_error_body = i
+    if y_error_prcnt > max_y_error_prcnt:
+        max_y_error_prcnt = y_error_prcnt
+        max_y_error_body = i
 
-    if vel_x_error_prcnt > max_v_error_prcnt:
-        max_v_error_prcnt = vel_x_error_prcnt
-        max_v_error_body = i
+    if vel_x_error_prcnt > max_vel_x_error_prcnt:
+        max_vel_x_error_prcnt = vel_x_error_prcnt
+        max_vel_x_error_body = i
 
-    if vel_y_error_prcnt > max_v_error_prcnt:
-        max_v_error_prcnt = vel_y_error_prcnt
-        max_v_error_body = i
+    if vel_y_error_prcnt > max_vel_y_error_prcnt:
+        max_vel_y_error_prcnt = vel_y_error_prcnt
+        max_vel_y_error_body = i
 
     if x_error_prcnt > 1 or y_error_prcnt > 1 or vel_x_error_prcnt > 1 or vel_y_error_prcnt > 1:
         invalid_bodies += 1
     
-    avg_p_error_prcnt += x_error_prcnt + y_error_prcnt
-    avg_v_error_prcnt += vel_x_error_prcnt + vel_y_error_prcnt
+    avg_x_error_prcnt += x_error_prcnt
+    avg_y_error_prcnt += y_error_prcnt
+    avg_vel_x_error_prcnt += vel_x_error_prcnt
+    avg_vel_y_error_prcnt += vel_y_error_prcnt
 
-avg_p_error_prcnt /= ref_b_count * 2
-avg_v_error_prcnt /= ref_b_count * 2
 
-avg_p_error_prcnt = round(avg_p_error_prcnt, 2)
-avg_v_error_prcnt = round(avg_v_error_prcnt, 2)
-max_p_error_prcnt = round(max_p_error_prcnt, 2)
-max_v_error_prcnt = round(max_v_error_prcnt, 2)
+avg_x_error_prcnt = round(avg_x_error_prcnt / ref_b_count, 2)
+avg_y_error_prcnt =     round(avg_y_error_prcnt / ref_b_count, 2)
+avg_vel_x_error_prcnt = round(avg_vel_x_error_prcnt / ref_b_count, 2)
+avg_vel_y_error_prcnt = round(avg_vel_y_error_prcnt / ref_b_count, 2)
+
+max_x_error_prcnt  = round(max_x_error_prcnt, 2) 
+max_y_error_prcnt = round(max_y_error_prcnt, 2)
+max_vel_x_error_prcnt = round(max_vel_x_error_prcnt, 2)
+max_vel_y_error_prcnt = round(max_vel_y_error_prcnt, 2)
+
 
 print(f"\nInvalid bodies (error > 1% ): {invalid_bodies}\n")
-print(f"AVG ERROR (%):\n  Position: {avg_p_error_prcnt}%\n  Velocity: {avg_v_error_prcnt}%\n")
-print(f"MAX ERROR (%):\n  Position: {max_p_error_prcnt}% (body: {max_p_error_body})\n  Velocity: {max_v_error_prcnt}% (body: {max_v_error_body})\n")
+print(f"AVG ERROR (%):\n  Position: [x]{avg_x_error_prcnt}%, [y]{avg_y_error_prcnt}%\n  Velocity: [x]{avg_vel_x_error_prcnt}%, [y]{avg_vel_y_error_prcnt}%\n")
+print(f"MAX ERROR (%):\n  Position: [x]{max_x_error_prcnt}% (body: {max_x_error_body}), [y]{max_y_error_prcnt}% (body: {max_y_error_body})")
+print(f"  Velocity: [x]{max_vel_x_error_prcnt}% (body: {max_vel_x_error_body}), [y]{max_vel_y_error_prcnt}% (body: {max_vel_y_error_body})\n")

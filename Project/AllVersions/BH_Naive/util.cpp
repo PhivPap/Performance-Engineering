@@ -33,7 +33,7 @@ Area::Area(double x1, double x2, double y1, double y2) :
     x1(x1), x2(x2), y1(y1), y2(y2) {}
 
 bool Area::contains(const Point& p) const {
-    return p.x >= x1 && p.x <= x2 && p.y <= y1 && p.y >= y2;
+    return p.x >= x1 && p.x <= x2 && p.y >= y1 && p.y <= y2;
 }
 
 double Area::side_length() const {
@@ -41,7 +41,7 @@ double Area::side_length() const {
 }
 
 double Area::diagonal_length() const {
-    return sqrt((x2 - x1) * (x2 - x1) - (y2 - y1) * (y2 - y1));
+    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 }
 
 Point Area::get_center() const {

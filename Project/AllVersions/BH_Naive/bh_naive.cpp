@@ -10,12 +10,12 @@
 #include <algorithm>
 #include "float.h"
 
-const std::string DEF_IN = "BodyFiles/in/in0.tsv";
+const std::string DEF_IN = "BodyFiles/in/def_in.tsv";
 const std::string DEF_OUT = "BodyFiles/out/bh_naive_out.tsv";
 const double G = 6.67e-11;                              // Gravitational constant
 const uint32_t total_time_steps = 50;                   // 50 hours
 const double time_step_length = 3600;                   // 1 hour
-const double theta = 1;
+const double theta = 0.4;
 
 
 void parse_input(const std::string& input_path, std::vector<Body>& bodies){
@@ -55,15 +55,10 @@ Area update_body_positions_and_get_area(Body* bodies, uint32_t body_count, doubl
         body.coords.y += delta_y;
         
         area.x1 = std::min(area.x1, body.coords.x);
-        area.x2 = std::max(area.x1, body.coords.x);
+        area.x2 = std::max(area.x2, body.coords.x);
         area.y1 = std::min(area.y1, body.coords.y);
         area.y2 = std::max(area.y2, body.coords.y);
     }
-    area.x1 -= 1;
-    area.y1 -= 1;
-    area.x2 += 1;
-    area.y2 += 1;
-
     return area;
 }
 
@@ -72,15 +67,15 @@ void compute_body2body_attraction(const Body* body1, const Body* body2, double& 
         return;
     const double distance = body1->coords.distance_to(body2->coords);
     const double F = (G * body1->mass * body2->mass) / (distance * distance);
-    Fx += (F * (body2->coords.x - body1->coords.x)) / distance;
-    Fy += (F * (body2->coords.y - body1->coords.y)) / distance;
+    Fx += F * (body2->coords.x - body1->coords.x) / distance;
+    Fy += F * (body2->coords.y - body1->coords.y) / distance;
 }
 
 void compute_body2quad_attraction(const Body* body, const Quad* quad, double& Fx, double& Fy) {
     const double distance = body->coords.distance_to(quad->center_of_mass);
     const double F = (G * body->mass * quad->mass) / (distance * distance);
-    Fx += (F * (quad->center_of_mass.x - body->coords.x)) / distance;
-    Fy += (F * (quad->center_of_mass.y - body->coords.y)) / distance;
+    Fx += F * (quad->center_of_mass.x - body->coords.x) / distance;
+    Fy += F * (quad->center_of_mass.y - body->coords.y) / distance;
 }
 
 void compute_body_forces(Quad* quad, Body* body, double& Fx, double& Fy){
@@ -97,9 +92,6 @@ void compute_body_forces(Quad* quad, Body* body, double& Fx, double& Fy){
     const auto distance = body->coords.distance_to(quad->center_of_mass);
 
     if (quad_diag / distance < theta){
-        // Point quad_center = quad->area.get_center();
-        //std::cout   << "Approximated: Body(" << body->coords.x << ", " << body->coords.y << ") - " 
-        //            << "Quad(" << quad_center.x << ", " << quad_center.y << ")\n"; 
         compute_body2quad_attraction(body, quad, Fx, Fy);
     }
     else {
@@ -123,8 +115,9 @@ void update_body_velocities(Quad* root, Body* bodies, uint32_t body_count, doubl
 
 void simulate(Body* bodies, uint32_t body_count, double time_step, uint32_t iterations){
     for (int i = 0; i < iterations; i++) {
-        std::cout << "iteration " << i << std::endl;
+        std::cout << "iteration: " << i;
         Area area = update_body_positions_and_get_area(bodies, body_count, time_step);
+        std::cout << ", universe diag: " << area.diagonal_length() << std::endl;
         Quad root(bodies, body_count, area);
         update_body_velocities(&root, bodies, body_count, time_step);
     }
