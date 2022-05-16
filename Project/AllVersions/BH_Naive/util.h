@@ -18,6 +18,7 @@ public:
     Area(double x1, double x2, double y1, double y2);
     bool contains(const Point& p) const;
     double side_length() const;
+    double diagonal_length() const;
     Point get_center() const;
 };
 

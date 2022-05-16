@@ -30,3 +30,6 @@ As02/Histo/histo_atomic
 As02/Histo/histo_per_thread.exe
 Project/bh_naive.exe
 Project/BodyFiles/out/out0.tsv
+Project/BodyFiles/out/bh_naive_out.tsv
+Project/BodyFiles/out/bh_ref_out.tsv
+Project/BodyFiles/out/naive_out.tsv

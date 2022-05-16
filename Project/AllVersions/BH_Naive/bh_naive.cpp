@@ -13,10 +13,9 @@
 const std::string DEF_IN = "BodyFiles/in/in0.tsv";
 const std::string DEF_OUT = "BodyFiles/out/bh_naive_out.tsv";
 const double G = 6.67e-11;                              // Gravitational constant
-const uint32_t total_time_steps = 10;                   // 50 hours
-const double time_step_length = 1;                      // 1 hour
-const double UNIVERSE_LEN = 2e13;
-const double theta = 1.0;
+const uint32_t total_time_steps = 50;                   // 50 hours
+const double time_step_length = 3600;                   // 1 hour
+const double theta = 1;
 
 
 void parse_input(const std::string& input_path, std::vector<Body>& bodies){
@@ -60,6 +59,11 @@ Area update_body_positions_and_get_area(Body* bodies, uint32_t body_count, doubl
         area.y1 = std::min(area.y1, body.coords.y);
         area.y2 = std::max(area.y2, body.coords.y);
     }
+    area.x1 -= 1;
+    area.y1 -= 1;
+    area.x2 += 1;
+    area.y2 += 1;
+
     return area;
 }
 
@@ -89,12 +93,13 @@ void compute_body_forces(Quad* quad, Body* body, double& Fx, double& Fy){
     }
 
     // magic formula check https://en.wikipedia.org/wiki/Barnes%E2%80%93Hut_simulation
-    const auto quad_width = quad->area.side_length();
+    const auto quad_diag = quad->diag_len;
     const auto distance = body->coords.distance_to(quad->center_of_mass);
-    assert(quad_width > 0);
-    assert(distance > 0);
 
-    if (quad_width / distance < theta){ 
+    if (quad_diag / distance < theta){
+        // Point quad_center = quad->area.get_center();
+        //std::cout   << "Approximated: Body(" << body->coords.x << ", " << body->coords.y << ") - " 
+        //            << "Quad(" << quad_center.x << ", " << quad_center.y << ")\n"; 
         compute_body2quad_attraction(body, quad, Fx, Fy);
     }
     else {
@@ -120,8 +125,6 @@ void simulate(Body* bodies, uint32_t body_count, double time_step, uint32_t iter
     for (int i = 0; i < iterations; i++) {
         std::cout << "iteration " << i << std::endl;
         Area area = update_body_positions_and_get_area(bodies, body_count, time_step);
-        // for (uint32_t j = 0; j < body_count; j++)
-        //     bodies[j].print();
         Quad root(bodies, body_count, area);
         update_body_velocities(&root, bodies, body_count, time_step);
     }
