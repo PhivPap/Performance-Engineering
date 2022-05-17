@@ -10,12 +10,25 @@
 #include <algorithm>
 #include "float.h"
 
-const std::string DEF_IN = "BodyFiles/in/def_in.tsv";
-const std::string DEF_OUT = "BodyFiles/out/bh_naive_out_005.tsv";
-const double G = 6.67e-11;                              // Gravitational constant
-const uint32_t total_time_steps = 50;                   // 50 hours
-const double time_step_length = 3600;                   // 1 hour
-const double theta = 0.05;
+
+// default values can be altered with the main args
+struct CFG {
+    std::string input_file = "BodyFiles/in/def_in.tsv";
+    std::string output_file = "BodyFiles/out/bh_naive_out_050.tsv";
+    uint32_t iterations = 50;
+    double iter_len = 3600;
+    double theta = 0.50;
+
+    void print(){
+        std::cout << "Configuration:" << std::endl;
+        std::cout   << "Input: " << input_file << "\nOutput: " << output_file 
+                    << "\nIterations: " << iterations << "\nIteration legth: "
+                    << iter_len << "s\nTheta: " << theta << std::endl << std::endl;
+    }
+};
+
+const double G = 6.67e-11;        // Gravitational constant
+CFG config;
 
 
 void parse_input(const std::string& input_path, std::vector<Body>& bodies){
@@ -91,7 +104,7 @@ void compute_body_forces(Quad* quad, Body* body, double& Fx, double& Fy){
     const auto quad_diag = quad->diag_len;
     const auto distance = body->coords.distance_to(quad->center_of_mass);
 
-    if (quad_diag / distance < theta){
+    if (quad_diag / distance < config.theta){
         compute_body2quad_attraction(body, quad, Fx, Fy);
     }
     else {
@@ -123,16 +136,51 @@ void simulate(Body* bodies, uint32_t body_count, double time_step, uint32_t iter
     }
 }
 
+void parse_args(int argc, const char** argv, CFG& config){
+    int32_t idx;
+    IO::ArgParser arg_parser(argc, argv);
+    try {
+        if ((idx = arg_parser.get_next_idx("-in")) > 0)
+            config.input_file = arg_parser.get(idx);
+
+        if ((idx = arg_parser.get_next_idx("-out")) > 0)
+            config.output_file = arg_parser.get(idx);
+
+        if ((idx = arg_parser.get_next_idx("-it")) > 0)
+            config.iterations = std::stoi(arg_parser.get(idx));
+
+        if ((idx = arg_parser.get_next_idx("-it_len")) > 0)
+            config.iter_len = std::stod(arg_parser.get(idx));
+
+        if ((idx = arg_parser.get_next_idx("-theta")) > 0)
+            config.theta = std::stod(arg_parser.get(idx));
+    }
+    catch (const std::string& ex){
+        std::cout << "Argument parsing exception: " << ex << std::endl;
+        exit(1);
+    }
+    catch (const std::invalid_argument& e){
+        std::cout << "Argument parsing exception: invalid argument." << std::endl;
+        exit(1);
+    }
+    catch (const std::out_of_range& e){
+        std::cout << "Argument parsing exception: out of range." << std::endl;
+        exit(1);
+    }
+}
+
 int main(int argc, const char** argv){
     std::vector<Body> bodies;
-    parse_input(DEF_IN, bodies);
+    parse_args(argc, argv, config);
+    config.print();
+    parse_input(config.input_file, bodies);
 
     const auto start = std::chrono::system_clock::now();
-    simulate(bodies.data(), bodies.size(), time_step_length, total_time_steps);
+    simulate(bodies.data(), bodies.size(), config.iter_len, config.iterations);
     const auto end = std::chrono::system_clock::now();
 
     const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() / 1e9;
     std::cout << "Seconds: " << elapsed << std::endl;
 
-    write_output(DEF_OUT, bodies);
+    write_output(config.output_file, bodies);
 }

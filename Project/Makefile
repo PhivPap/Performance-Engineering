@@ -1,7 +1,7 @@
 .SECONDEXPANSION:
 CXX_FLAGS = -std=c++17 -O3
 
-DEF_DEPS = InputOutput/IOBody.cpp InputOutput/Parser.cpp InputOutput/Writer.cpp
+DEF_DEPS = InputOutput/IOBody.cpp InputOutput/Parser.cpp InputOutput/Writer.cpp InputOutput/ArgParser.cpp
 APPS = naive bh_naive 
 # bh_omp
 

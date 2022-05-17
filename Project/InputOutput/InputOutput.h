@@ -3,7 +3,7 @@
 
 #include <fstream>
 #include <string>
-#include <list>
+#include <vector>
 
 namespace IO {
     class Body {
@@ -39,6 +39,17 @@ namespace IO {
     private:
         bool failed = false;
         std::ofstream output_file;
+    };
+
+    class ArgParser {
+    public:
+        ArgParser(void) = delete;
+        ArgParser(int argc, const char** argv);
+        int32_t get_next_idx(const std::string& str);  // returns - 1 if not found and -2 if next does not exist
+        std::string get(uint32_t idx);
+    private:
+        const int argc;
+        const char** argv;
     };
 }
 
