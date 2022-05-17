@@ -24,7 +24,7 @@ struct CFG {
         std::cout << "Configuration:" << std::endl;
         std::cout   << "Input: " << input_file << "\nOutput: " << output_file 
                     << "\nIterations: " << iterations << "\nIteration legth: "
-                    << iter_len << "s\nTheta: " << theta << "\nThreads:"
+                    << iter_len << "s\nTheta: " << theta << "\nThreads: "
                     << thread_count << std::endl << std::endl;
     }
 };
@@ -158,7 +158,8 @@ void parse_args(int argc, const char** argv, CFG& config){
         if ((idx = arg_parser.get_next_idx("-theta")) > 0)
             config.theta = std::stod(arg_parser.get(idx));
 
-
+        if ((idx = arg_parser.get_next_idx("-threads")) > 0)
+            config.thread_count = std::stod(arg_parser.get(idx));
     }
     catch (const std::string& ex){
         std::cout << "Argument parsing exception: " << ex << std::endl;
