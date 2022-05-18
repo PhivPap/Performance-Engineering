@@ -12,9 +12,11 @@
 #include <sys/time.h>
 #include "mmio.h"
 
+#define CSR
+
 #ifdef CSR
 #include "csr_spmv_kernel.h"
-#elif CSC
+#elif defined(CSC)
 #include "csc_spmv_kernel.h"
 #elif COO
 #include "coo_spmv_kernel.h"
@@ -150,7 +152,7 @@ int read_mat(int *m, int *n, int *nzA, FILE* fa, int *is_pattern) {
   return 0;
 }
 
-#ifdef CSR
+// #ifdef CSR
 /*
  * Converts matrix to CSR format. 
  * returns the number of nonZero's found during conversion
@@ -194,7 +196,7 @@ void print_mat_csr(int m, int nzA, int *sA_rows, int *sA_col_idx, float *sA_vals
 
 }
 
-#endif
+// #endif
 
 #ifdef CSC
 /*
@@ -295,7 +297,7 @@ int main (int argc, char** argv) {
 #ifdef CSR
  float *sA_vals;
  int *sA_rows, *sA_cols_idx;
-#elif CSC
+#elif defined(CSC)
  float *sA_vals;
  int *sA_cols, *sA_rows_idx;
 #elif COO
@@ -303,7 +305,7 @@ int main (int argc, char** argv) {
  int *sA_cols, *sA_rows;
 #endif
 
-
+ 
 
  struct timeval before, after;
  int r, m, n, err;
@@ -352,7 +354,7 @@ int main (int argc, char** argv) {
  	print_mat_csr(m, nzA, sA_rows, sA_cols_idx, sA_vals);
 #endif
 
-#elif CSC
+#elif defined(CSC)
         sA_cols = (int *)calloc(n+1,sizeof(int));
         sA_rows_idx = (int *)calloc(nzA,sizeof(int));
         sA_vals = (float *)calloc(nzA,sizeof(float));
@@ -398,7 +400,7 @@ for (r=0; r<REP; r++)
  /* Call the SpMV kernel. */
 #ifdef CSR
   csr_spmv(m,sA_rows, sA_cols_idx, sA_vals, B, C); 
-#elif CSC
+#elif defined(CSC)
   csc_spmv(n,sA_cols, sA_rows_idx, sA_vals, B, C);
 #elif COO
   coo_spmv(nzA, sA_rows, sA_cols, sA_vals, B, C); 

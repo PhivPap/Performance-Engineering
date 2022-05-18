@@ -13,13 +13,13 @@ ifneq ($(SERIAL), 1)
 	CXX_FLAGS += $(PAR_FLAG)
 endif
 
-APPS = spmv csc_spmv csr_spmv coo_spmv matmul_cuda
+APPS = spmv csc_spmv csr_spmv coo_spmv matmul_cuda 
 
 .PHONY: all
 
 all: $(APPS)
 
-spmv: spmv.c mmio.c spmv_kernel.c
+spmv: spmv.c mmio.c spmv_kernel.c csr_spmv_kernel.c csc_spmv_kernel.c
 	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -o $@ $^ $(LFLAGS)
 
 csr_spmv: spmv.c mmio.c csr_spmv_kernel.c
