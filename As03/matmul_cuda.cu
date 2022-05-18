@@ -6,7 +6,7 @@
 
 #define check(error) checkCudaCall(error, __LINE__)
 
-const uint32_t REP = 10;
+const uint32_t REP = 50;
 const uint32_t BLOCK_WIDTH = 16;
 const uint32_t BLOCK_HEIGHT = 16;
 
