@@ -86,10 +86,19 @@ void update_body_velocities(Body* bodies, uint32_t body_count, double time_step)
 }
 
 void simulate(Body* bodies, uint32_t body_count, double time_step, uint32_t iterations){
+    double elapsed_p0 = 0.0, elapsed_p1 = 0.0;
     for (uint32_t i = 0; i < iterations; i++){
+        const auto cp0 = std::chrono::system_clock::now();
         update_body_positions(bodies, body_count, time_step);
+        const auto cp1 = std::chrono::system_clock::now();
         update_body_velocities(bodies, body_count, time_step);
+        const auto cp2 = std::chrono::system_clock::now();
+
+        elapsed_p0 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp1 - cp0).count();
+        elapsed_p1 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp2 - cp1).count();
     }
+    std::cout << "Update positions (per iteration): " << elapsed_p0 / (1e9 * iterations) << std::endl;
+    std::cout << "Velocity computation (per iteration): " << elapsed_p1 / (1e9 * iterations) << std::endl;
 }
 
 void parse_args(int argc, const char** argv, CFG& config){
@@ -133,6 +142,7 @@ int main(int argc, const char** argv){
     const auto end = std::chrono::system_clock::now();
     const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() / 1e9;
     std::cout << "Seconds: " << elapsed << std::endl;
+    std::cout << "Seconds per iteration: " << elapsed / config.iterations << std::endl;
 
     write_output(config.output_file, bodies);
 }

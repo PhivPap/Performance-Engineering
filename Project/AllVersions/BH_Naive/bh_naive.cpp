@@ -29,6 +29,7 @@ struct CFG {
 
 const double G = 6.67e-11;        // Gravitational constant
 CFG config;
+uint64_t approximations, total_visits;
 
 
 void parse_input(const std::string& input_path, std::vector<Body>& bodies){
@@ -76,7 +77,7 @@ Area update_body_positions_and_get_area(Body* bodies, uint32_t body_count, doubl
 }
 
 void compute_body2body_attraction(const Body* body1, const Body* body2, double& Fx, double& Fy) {
-    if (body1 == body2)
+    if (body1 == body2) // assume that it's almost always false and it's correctly predicted by the cpu
         return;
     const double distance = body1->coords.distance_to(body2->coords);
     const double F = (G * body1->mass * body2->mass) / (distance * distance);
@@ -92,10 +93,12 @@ void compute_body2quad_attraction(const Body* body, const Quad* quad, double& Fx
 }
 
 void compute_body_forces(Quad* quad, Body* body, double& Fx, double& Fy){
+    total_visits++;
     const auto quad_body_count = quad->body_count;
     if (quad_body_count == 0)
         return;
     if (quad_body_count == 1) {
+        approximations += 1;
         compute_body2body_attraction(body, quad->contained_bodies.front(), Fx, Fy);
         return;
     }
@@ -105,6 +108,7 @@ void compute_body_forces(Quad* quad, Body* body, double& Fx, double& Fy){
     const auto distance = body->coords.distance_to(quad->center_of_mass);
 
     if (quad_diag / distance < config.theta){
+        approximations += 1;
         compute_body2quad_attraction(body, quad, Fx, Fy);
     }
     else {
@@ -127,13 +131,31 @@ void update_body_velocities(Quad* root, Body* bodies, uint32_t body_count, doubl
 
 
 void simulate(Body* bodies, uint32_t body_count, double time_step, uint32_t iterations){
+    double elapsed_p0 = 0.0, elapsed_p1 = 0.0, elapsed_p2 = 0.0;
     for (int i = 0; i < iterations; i++) {
-        // std::cout << "iteration: " << i;
+        approximations = total_visits = 0;
+
+        const auto cp0 = std::chrono::system_clock::now();
         Area area = update_body_positions_and_get_area(bodies, body_count, time_step);
-        // std::cout << ", universe diag: " << area.diagonal_length() << std::endl;
+        const auto cp1 = std::chrono::system_clock::now();
         Quad root(bodies, body_count, area);
+        const auto cp2 = std::chrono::system_clock::now();
         update_body_velocities(&root, bodies, body_count, time_step);
+        const auto cp3 = std::chrono::system_clock::now();
+
+        elapsed_p0 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp1 - cp0).count();
+        elapsed_p1 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp2 - cp1).count();
+        elapsed_p2 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp3 - cp2).count();
+
+        std::cout << "Iteration: " << i << std::endl;
+        std::cout << "\tDiagonal Length: " << area.diagonal_length() << std::endl;
+        std::cout << "\tApprox factor: " << (double)approximations / (body_count * body_count) << std::endl;
+        std::cout << "\tAvg visits (per body): " << (double)total_visits / body_count << std::endl;
+        
     }
+    std::cout << "Update positions (per iteration): " << elapsed_p0 / (1e9 * iterations) << "s" << std::endl;
+    std::cout << "QuadTree generation (per iteration): " << elapsed_p1 / (1e9 * iterations) << "s" << std::endl;
+    std::cout << "Velocity computation (per iteration): " << elapsed_p2 / (1e9 * iterations) << "s" << std::endl;
 }
 
 void parse_args(int argc, const char** argv, CFG& config){
@@ -181,6 +203,7 @@ int main(int argc, const char** argv){
 
     const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() / 1e9;
     std::cout << "Seconds: " << elapsed << std::endl;
+    std::cout << "Seconds per iteration: " << elapsed / config.iterations << std::endl;
 
     write_output(config.output_file, bodies);
 }

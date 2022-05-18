@@ -188,6 +188,7 @@ int main(int argc, const char** argv){
 
     const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() / 1e9;
     std::cout << "Seconds: " << elapsed << std::endl;
+    std::cout << "Seconds per iteration: " << elapsed / config.iterations << std::endl;
 
     write_output(config.output_file, bodies);
 }

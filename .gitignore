@@ -34,3 +34,6 @@ Project/BodyFiles/out/bh_naive_out.tsv
 Project/BodyFiles/out/bh_ref_out.tsv
 Project/BodyFiles/out/naive_out.tsv
 Project/bh_omp.exe
+Project/naive
+Project/bh_omp
+Project/bh_naive
