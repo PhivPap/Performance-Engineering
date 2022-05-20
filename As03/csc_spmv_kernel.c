@@ -14,7 +14,7 @@ void csc_spmv(int n, const int *A_cols, const int *A_rows_idx, const float *A_va
     int i,j;
     int col_start, col_end;  
 
-    #pragma omp parallel \
+    #pragma omp parallel for \
     shared(n, A_cols, A_rows_idx, A_values, B, C) \
     private(i, j, col_start, col_end) \
     schedule(static)
