@@ -15,17 +15,15 @@ void csc_spmv(int n, const int *A_cols, const int *A_rows_idx, const float *A_va
     int col_start, col_end;  
 
     #pragma omp parallel \
-    shared(A_cols, A_rows_idx, A_values, B, C) \
-    private(n, i, j, col_start, col_end)
-    {
-        #pragma omp for  
-        for (i = 0; i < n; i++) {
-            col_start = A_cols[i];
-            col_end = A_cols[i + 1];
-            
-            for (j = col_start; j < col_end; j++) {
-                C[A_rows_idx[j]] += A_values[j] * B[i];
-            }
+    shared(n, A_cols, A_rows_idx, A_values, B, C) \
+    private(i, j, col_start, col_end) \
+    schedule(static)
+    for (i = 0; i < n; i++) {
+        col_start = A_cols[i];
+        col_end = A_cols[i + 1];
+        
+        for (j = col_start; j < col_end; j++) {
+            C[A_rows_idx[j]] += A_values[j] * B[i];
         }
     }
 }

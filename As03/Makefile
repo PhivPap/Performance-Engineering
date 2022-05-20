@@ -13,14 +13,14 @@ ifneq ($(SERIAL), 1)
 	CXX_FLAGS += $(PAR_FLAG)
 endif
 
-APPS = spmv csc_spmv csr_spmv coo_spmv matmul_cuda 
+APPS = matmul_cuda csc_spmv csr_spmv # spmv coo_spmv 
 
 .PHONY: all
 
 all: $(APPS)
 
-spmv: spmv.c mmio.c spmv_kernel.c csr_spmv_kernel.c csc_spmv_kernel.c
-	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -o $@ $^ $(LFLAGS)
+# spmv: spmv.c mmio.c spmv_kernel.c csr_spmv_kernel.c csc_spmv_kernel.c
+# 	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -o $@ $^ $(LFLAGS)
 
 csr_spmv: spmv.c mmio.c csr_spmv_kernel.c
 	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D CSR -o $@ $^ $(LFLAGS)
@@ -28,8 +28,8 @@ csr_spmv: spmv.c mmio.c csr_spmv_kernel.c
 csc_spmv: spmv.c mmio.c csc_spmv_kernel.c
 	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D CSC -o $@ $^ $(LFLAGS)
 
-coo_spmv: spmv.c mmio.c coo_spmv_kernel.c
-	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D COO -o $@ $^ $(LFLAGS)
+# coo_spmv: spmv.c mmio.c coo_spmv_kernel.c
+# 	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D COO -o $@ $^ $(LFLAGS)
 
 matmul_cuda: matmul_cuda.cu mmio.cpp MatrixParser/matrixparser.cpp
 	nvcc -O3 -Xptxas -O3 -o $@ $^

@@ -11,8 +11,7 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include "mmio.h"
-
-#define CSR
+#include <omp.h>
 
 #ifdef CSR
 #include "csr_spmv_kernel.h"
@@ -31,6 +30,7 @@
 
 #define REP 1
 
+const int THREAD_COUNT = 16;
 
 /* 
  * for nz=1 - dense matrix; for nz>1 - sparse matrix with every nz element non-0; for nz=0: error
@@ -293,6 +293,7 @@ void print_mat_coo(int nzA, int *sA_rows, int *sA_cols, float *sA_vals)
 
 
 int main (int argc, char** argv) {
+  omp_set_num_threads(THREAD_COUNT);
  float *A, *B, *C;
 #ifdef CSR
  float *sA_vals;
