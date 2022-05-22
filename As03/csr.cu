@@ -36,7 +36,9 @@ void checkCudaCall(cudaError_t result, uint32_t line)
 __global__ void csr(const int *A_rows, const int *A_cols_idx, const float *A_values, const float *B, float *C) {
     int i,j;
     int c = 0;
-    int row_start, row_end;  
+    int row_start, row_end;
+
+    i = blockIdx.x;  
 
         float tmp = 0.0f;
         row_start = A_rows[i];
@@ -51,7 +53,7 @@ __global__ void csr(const int *A_rows, const int *A_cols_idx, const float *A_val
 }
 
 void gpu_memory_init(int m, int n, int nzA, int *A_rows, int *A_cols_idx, float *A_values, float *B, float *C,
-    int *d_A_rows, int *d_A_cols_idx, float *d_A_values, float *d_B, float *d_C)
+    int **d_A_rows, int **d_A_cols_idx, float **d_A_values, float **d_B, float **d_C)
 {
     const uint32_t A_rows_size = sizeof(int) * (m + 1);
     const uint32_t A_cols_idx_size = sizeof(int) * nzA;
@@ -96,7 +98,7 @@ void csr_spmv(int m, int n, int nzA, int *A_rows, int *A_cols_idx, float *A_valu
     dim3 grid(grid_width, grid_height);
     dim3 block(block_width, block_height);
 
-    gpu_memory_init(m, n, nzA, A_rows, A_cols_idx, A_values, B, C, d_A_rows, d_A_cols_idx, d_A_values, d_B, d_C);
+    gpu_memory_init(m, n, nzA, A_rows, A_cols_idx, A_values, B, C, &d_A_rows, &d_A_cols_idx, &d_A_values, &d_B, &d_C);
 
     const auto start = std::chrono::system_clock::now();
     for (r=0; r<REP; r++) 
@@ -203,7 +205,7 @@ void print_mat(int m, int n, float *A) {
 
 int read_mat(int *m, int *n, int *nzA, FILE* fa, int *is_pattern) {
   MM_typecode ta;
-  int ret_code; 
+  int ret_code = 0; 
 
   if (mm_read_banner(fa, &ta) != 0)
     {
@@ -232,7 +234,7 @@ int read_mat(int *m, int *n, int *nzA, FILE* fa, int *is_pattern) {
     }
   else return -8; 
 
-  return 0;
+  return ret_code;
 }
 
 /*
