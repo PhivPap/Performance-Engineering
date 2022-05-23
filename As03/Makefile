@@ -34,7 +34,7 @@ csc_spmv: spmv.c mmio.c csc_spmv_kernel.c
 matmul_cuda: matmul_cuda.cu mmio.cpp MatrixParser/matrixparser.cpp
 	nvcc -O3 -Xptxas -O3 -o $@ $^
 
-csr_cuda: csr.cu mmio.c
+csr_cuda: csr.cu mmio.cpp
 	nvcc -O3 -Xptxas -O3 -o $@ $^
 
 .PHONY: clean

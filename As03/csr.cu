@@ -20,7 +20,7 @@
 #define N  512
 #define M  512
 
-#define REP 1
+#define REP 100
 
 void checkCudaCall(cudaError_t result, uint32_t line)
 {
@@ -35,7 +35,6 @@ void checkCudaCall(cudaError_t result, uint32_t line)
 
 __global__ void csr(const int *A_rows, const int *A_cols_idx, const float *A_values, const float *B, float *C) {
     int i,j;
-    int c = 0;
     int row_start, row_end;
 
     i = blockIdx.x;  
@@ -46,7 +45,6 @@ __global__ void csr(const int *A_rows, const int *A_cols_idx, const float *A_val
         
         for (j = row_start; j < row_end; j++) {
             tmp += A_values[j] * B[A_cols_idx[j]];
-            c++;
         }
         
         C[i] = tmp;
@@ -103,7 +101,7 @@ void csr_spmv(int m, int n, int nzA, int *A_rows, int *A_cols_idx, float *A_valu
     const auto start = std::chrono::system_clock::now();
     for (r=0; r<REP; r++) 
     {
-        csr<<<grid, block>>>(d_A_rows, d_A_cols_idx, d_A_values, d_B, d_C);
+        csr<<<m, 1>>>(d_A_rows, d_A_cols_idx, d_A_values, d_B, d_C);
         cudaDeviceSynchronize();
     }
     const auto end = std::chrono::system_clock::now();
@@ -113,6 +111,7 @@ void csr_spmv(int m, int n, int nzA, int *A_rows, int *A_cols_idx, float *A_valu
     using std::chrono::milliseconds;
     const double avg_execution_time = duration_cast<milliseconds>(end - start).count() / 1000.0 / REP;
     printf("Seconds: %f\n", avg_execution_time);
+    printf("REP: %i\n", REP);
     
     gpu_memory_free(d_A_rows, d_A_cols_idx, d_A_values, d_B, d_C);
 }
@@ -345,7 +344,7 @@ int main (int argc, char** argv) {
  if (C==NULL) {printf("Out of memory C! \n"); exit(1);}
 
  /* Call the SpMV kernel. */
-  csr_spmv(m, n, nzA, sA_rows, sA_cols_idx, sA_vals, B, C); 
+  csr_spmv(m, n, nzA, sA_rows, sA_cols_idx, sA_vals, B, C);
 
  if ((fc = fopen(argv[2], "wt")) == NULL) exit(3);    
 // write_sparse(fc,n,m,C);
