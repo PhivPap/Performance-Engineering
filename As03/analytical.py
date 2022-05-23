@@ -26,4 +26,4 @@ for file in files:
     max_rows = max(rows)
 
     print(f"{file} rows: {max_rows} seconds: "
-          f"{math.ceil(rows_size/3072.0) * (max_rows * 0.000006 + max_rows * 0.000006 + max_rows * 0.00000032)}")
+          f"{math.ceil(rows_size/3072.0) * (max_rows * 0.000006 + max_rows * 0.000006 + rows_size * 0.00000032)}")
