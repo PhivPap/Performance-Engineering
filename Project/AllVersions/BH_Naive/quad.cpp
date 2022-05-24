@@ -12,8 +12,8 @@ Quad::Quad(Body* bodies, uint32_t body_count, const Area& area) : center_of_mass
     diag_len = area.diagonal_length();
     for (uint32_t i = 0; i < body_count; i++)
         insert_body(&(bodies[i]));
-    compute_bhtree_recursive(0);
-    recursive_center_of_mass_computation(0);
+    compute_bhtree_recursive();
+    recursive_center_of_mass_computation();
 }
 
 Quad::~Quad() {
@@ -31,9 +31,7 @@ void Quad::insert_body(Body* body){
     body_count++;
 }
 
-void Quad::compute_bhtree_recursive(int level){
-    // std::cout << "body_count: " << body_count << ", level: " << level << std::endl;
-
+void Quad::compute_bhtree_recursive(void){
     if (body_count <= 1)
         return;
 
@@ -60,23 +58,23 @@ void Quad::compute_bhtree_recursive(int level){
         }
     }
 
-    top_left_quad->compute_bhtree_recursive(level + 1);
-    top_right_quad->compute_bhtree_recursive(level + 1);
-    bot_left_quad->compute_bhtree_recursive(level + 1);
-    bot_right_quad->compute_bhtree_recursive(level + 1);
+    top_left_quad->compute_bhtree_recursive();
+    top_right_quad->compute_bhtree_recursive();
+    bot_left_quad->compute_bhtree_recursive();
+    bot_right_quad->compute_bhtree_recursive();
 }
 
 // must be called on the root of the tree once the tree is generated.
-void Quad::recursive_center_of_mass_computation(int level){
+void Quad::recursive_center_of_mass_computation(void){
     if (body_count == 0)
         return;
     else if (body_count == 1)
         center_of_mass = contained_bodies.front()->coords;
     else {
-        top_left_quad->recursive_center_of_mass_computation(level + 1);
-        top_right_quad->recursive_center_of_mass_computation(level + 1);
-        bot_left_quad->recursive_center_of_mass_computation(level + 1);
-        bot_right_quad->recursive_center_of_mass_computation(level + 1);
+        top_left_quad->recursive_center_of_mass_computation();
+        top_right_quad->recursive_center_of_mass_computation();
+        bot_left_quad->recursive_center_of_mass_computation();
+        bot_right_quad->recursive_center_of_mass_computation();
 
         // computes the center of mass by using the center of mass of it's four children
         center_of_mass = Point::get_center_of_mass(
@@ -89,16 +87,5 @@ void Quad::recursive_center_of_mass_computation(int level){
                 bot_right_quad->center_of_mass, bot_right_quad->mass
             ), bot_left_quad->mass + bot_right_quad->mass
         );
-
-
     }
-
-
-    // std::string prelude = "";
-    // for (int i = 0; i < level; i++)
-    //     prelude += "\t";
-
-    // std::cout << prelude << "x: " << area.x1 << " <= " <<center_of_mass.x << " <= " << area.x2 << std::endl;
-    // std::cout << prelude <<  "y: " << area.y1 << " <= " <<center_of_mass.y << " <= " << area.y2 << std::endl;
-    
 }

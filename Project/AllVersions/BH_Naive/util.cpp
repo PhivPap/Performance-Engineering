@@ -1,11 +1,7 @@
 #include "util.h"
 #include <cmath>
 
-
-
 /* Point methods */
-
-// Point::Point(void): x(0), y(0) {}
 
 Point::Point(double x, double y) : x(x), y(y) {}
 
@@ -26,8 +22,6 @@ Point Point::get_center_of_mass(const Point& p1, double mass1, const Point& p2, 
 }
 
 /* Area methods */
-
-// Area::Area(void): x1(0), x2(0), y1(0), y2(0) {}
 
 Area::Area(double x1, double x2, double y1, double y2) :
     x1(x1), x2(x2), y1(y1), y2(y2) {}

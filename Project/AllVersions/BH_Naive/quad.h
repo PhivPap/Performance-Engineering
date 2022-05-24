@@ -9,7 +9,7 @@
 // The main quadtree class
 class Quad{
 private:
-    void compute_bhtree_recursive(int level);
+    void compute_bhtree_recursive(void);
 
 public:
     Area area; 
@@ -24,14 +24,12 @@ public:
     Quad* bot_left_quad;
     Quad* bot_right_quad;
 
-    
-
     Quad(void) = delete;
     Quad(const Area& area);
     Quad(Body* bodies, uint32_t body_count, const Area& area);
     ~Quad();
     void insert_body(Body* body);
-    void recursive_center_of_mass_computation(int level);
+    void recursive_center_of_mass_computation(void);
 };
 
 
