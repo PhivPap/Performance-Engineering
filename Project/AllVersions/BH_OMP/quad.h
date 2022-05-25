@@ -9,7 +9,10 @@
 // The main quadtree class
 class Quad{
 private:
-    void compute_bhtree_recursive(void);
+    void compute_bhtree_recursive(uint8_t depth);
+    void compute_bhtree_recursive_seq(void);
+    //void recursive_center_of_mass_computation(void);
+    inline static uint8_t MAX_TASK_GEN_DEPTH = 0;
 
 public:
     Area area; 
@@ -29,7 +32,7 @@ public:
     Quad(Body* bodies, uint32_t body_count, const Area& area);
     ~Quad();
     void insert_body(Body* body);
-    void recursive_center_of_mass_computation(void);
+    static void set_max_task_generation_depth(uint8_t max_task_gen_depth);
 };
 
 

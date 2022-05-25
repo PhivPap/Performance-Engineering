@@ -14,18 +14,20 @@
 // default values can be altered with the main args
 struct CFG {
     std::string input_file = "BodyFiles/in/def_in.tsv";
-    std::string output_file = "BodyFiles/out/bh_omp_out_050.tsv";
+    std::string output_file = "BodyFiles/out/bh_omp_out.tsv";
     uint32_t iterations = 50;
     double iter_len = 3600;
     uint32_t thread_count = 4;
     double theta = 0.50;
+    uint8_t max_task_gen_depth = 1;
 
     void print(){
         std::cout << "Configuration:" << std::endl;
-        std::cout   << "Input: " << input_file << "\nOutput: " << output_file 
-                    << "\nIterations: " << iterations << "\nIteration legth: "
-                    << iter_len << "s\nTheta: " << theta << "\nThreads: "
-                    << thread_count << std::endl << std::endl;
+        std::cout   << "\tInput: " << input_file << "\n\tOutput: " << output_file 
+                    << "\n\tIterations: " << iterations << "\n\tIteration legth: "
+                    << iter_len << "s\n\tTheta: " << theta << "\n\tThreads: "
+                    << thread_count << "\n\tMax task generation depth: " 
+                    << max_task_gen_depth << std::endl << std::endl;
     }
 };
 
@@ -160,6 +162,9 @@ void parse_args(int argc, const char** argv, CFG& config){
 
         if ((idx = arg_parser.get_next_idx("-threads")) > 0)
             config.thread_count = std::stod(arg_parser.get(idx));
+
+        if ((idx = arg_parser.get_next_idx("-task_depth")) > 0)
+            config.max_task_gen_depth = std::stoi(arg_parser.get(idx));
     }
     catch (const std::string& ex){
         std::cout << "Argument parsing exception: " << ex << std::endl;
@@ -180,6 +185,7 @@ int main(int argc, const char** argv){
     parse_args(argc, argv, config);
     config.print();
     omp_set_num_threads(config.thread_count);
+    Quad::set_max_task_generation_depth(config.max_task_gen_depth);
     parse_input(config.input_file, bodies);
 
     const auto start = std::chrono::system_clock::now();

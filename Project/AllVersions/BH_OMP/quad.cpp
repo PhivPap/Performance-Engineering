@@ -12,8 +12,8 @@ Quad::Quad(Body* bodies, uint32_t body_count, const Area& area) : center_of_mass
     diag_len = area.diagonal_length();
     for (uint32_t i = 0; i < body_count; i++)
         insert_body(&(bodies[i]));
-    compute_bhtree_recursive();
-    recursive_center_of_mass_computation();
+    compute_bhtree_recursive(0);
+    //recursive_center_of_mass_computation();
 }
 
 Quad::~Quad() {
@@ -31,9 +31,13 @@ void Quad::insert_body(Body* body){
     body_count++;
 }
 
-void Quad::compute_bhtree_recursive(void){
-    if (body_count <= 1)
+void Quad::compute_bhtree_recursive(uint8_t depth){
+    if (body_count == 0)
         return;
+    else if (body_count == 1){
+        center_of_mass = contained_bodies.front()->coords;
+        return;
+    }
 
     const Point& center = area.get_center();
     top_left_quad = new Quad({ area.x1, center.x, area.y1, center.y });
@@ -58,34 +62,99 @@ void Quad::compute_bhtree_recursive(void){
         }
     }
 
-    top_left_quad->compute_bhtree_recursive();
-    top_right_quad->compute_bhtree_recursive();
-    bot_left_quad->compute_bhtree_recursive();
-    bot_right_quad->compute_bhtree_recursive();
+    uint8_t depth_plus = depth + 1;
+    if (depth < MAX_TASK_GEN_DEPTH){
+        #pragma omp task
+        top_left_quad->compute_bhtree_recursive(depth_plus);
+        #pragma omp task
+        top_right_quad->compute_bhtree_recursive(depth_plus);
+        #pragma omp task
+        bot_left_quad->compute_bhtree_recursive(depth_plus);
+        bot_right_quad->compute_bhtree_recursive(depth_plus);
+        #pragma omp taskwait
+    }
+    else {
+        top_left_quad->compute_bhtree_recursive_seq();
+        top_right_quad->compute_bhtree_recursive_seq();
+        bot_left_quad->compute_bhtree_recursive_seq();
+        bot_right_quad->compute_bhtree_recursive_seq();
+    }
 }
 
-// must be called on the root of the tree once the tree is generated.
-void Quad::recursive_center_of_mass_computation(void){
+void Quad::compute_bhtree_recursive_seq(void){
     if (body_count == 0)
         return;
-    else if (body_count == 1)
+    else if (body_count == 1){
         center_of_mass = contained_bodies.front()->coords;
-    else {
-        top_left_quad->recursive_center_of_mass_computation();
-        top_right_quad->recursive_center_of_mass_computation();
-        bot_left_quad->recursive_center_of_mass_computation();
-        bot_right_quad->recursive_center_of_mass_computation();
+        return;
+    }
 
-        // computes the center of mass by using the center of mass of it's four children
-        center_of_mass = Point::get_center_of_mass(
-            Point::get_center_of_mass(
-                top_left_quad->center_of_mass, top_left_quad->mass,
-                top_right_quad->center_of_mass, top_right_quad->mass
-            ), top_left_quad->mass + top_right_quad->mass,
-            Point::get_center_of_mass(
-                bot_left_quad->center_of_mass, bot_left_quad->mass,
-                bot_right_quad->center_of_mass, bot_right_quad->mass
-            ), bot_left_quad->mass + bot_right_quad->mass
-        );
-    } 
+    const Point& center = area.get_center();
+    top_left_quad = new Quad({ area.x1, center.x, area.y1, center.y });
+    top_right_quad = new Quad({ center.x, area.x2, area.y1, center.y });
+    bot_left_quad = new Quad({ area.x1, center.x, center.y, area.y2 });
+    bot_right_quad = new Quad({ center.x, area.x2, center.y, area.y2 });
+
+    for (Body* body : contained_bodies){
+        const Point& coords = body->coords;
+
+        if (coords.x > center.x) { // right
+            if (coords.y > center.y) // bottom
+                bot_right_quad->insert_body(body);
+            else // top
+                top_right_quad->insert_body(body);
+        }
+        else { // left
+            if (coords.y > center.y) // bottom
+                bot_left_quad->insert_body(body);
+            else  // top
+                top_left_quad->insert_body(body);
+        }
+    }
+
+    top_left_quad->compute_bhtree_recursive_seq();
+    top_right_quad->compute_bhtree_recursive_seq();
+    bot_left_quad->compute_bhtree_recursive_seq();
+    bot_right_quad->compute_bhtree_recursive_seq();
+
+    center_of_mass = Point::get_center_of_mass(
+        Point::get_center_of_mass(
+            top_left_quad->center_of_mass, top_left_quad->mass,
+            top_right_quad->center_of_mass, top_right_quad->mass
+        ), top_left_quad->mass + top_right_quad->mass,
+        Point::get_center_of_mass(
+            bot_left_quad->center_of_mass, bot_left_quad->mass,
+            bot_right_quad->center_of_mass, bot_right_quad->mass
+        ), bot_left_quad->mass + bot_right_quad->mass
+    );
+}
+
+// // must be called on the root of the tree once the tree is generated.
+// void Quad::recursive_center_of_mass_computation(void){
+//     if (body_count == 0)
+//         return;
+//     else if (body_count == 1)
+//         center_of_mass = contained_bodies.front()->coords;
+//     else {
+//         top_left_quad->recursive_center_of_mass_computation();
+//         top_right_quad->recursive_center_of_mass_computation();
+//         bot_left_quad->recursive_center_of_mass_computation();
+//         bot_right_quad->recursive_center_of_mass_computation();
+
+//         // computes the center of mass by using the center of mass of it's four children
+//         center_of_mass = Point::get_center_of_mass(
+//             Point::get_center_of_mass(
+//                 top_left_quad->center_of_mass, top_left_quad->mass,
+//                 top_right_quad->center_of_mass, top_right_quad->mass
+//             ), top_left_quad->mass + top_right_quad->mass,
+//             Point::get_center_of_mass(
+//                 bot_left_quad->center_of_mass, bot_left_quad->mass,
+//                 bot_right_quad->center_of_mass, bot_right_quad->mass
+//             ), bot_left_quad->mass + bot_right_quad->mass
+//         );
+//     } 
+// }
+
+void Quad::set_max_task_generation_depth(uint8_t max_task_gen_depth){
+    MAX_TASK_GEN_DEPTH = max_task_gen_depth; 
 }
