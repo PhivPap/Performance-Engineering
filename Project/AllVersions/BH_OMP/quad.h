@@ -12,7 +12,7 @@ private:
     void compute_bhtree_recursive(uint8_t depth);
     void compute_bhtree_recursive_seq(void);
     //void recursive_center_of_mass_computation(void);
-    inline static uint8_t MAX_TASK_GEN_DEPTH = 0;
+    static uint8_t MAX_TASK_GEN_DEPTH;
 
 public:
     Area area; 

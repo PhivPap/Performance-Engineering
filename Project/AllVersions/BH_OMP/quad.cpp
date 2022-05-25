@@ -1,6 +1,8 @@
 #include "quad.h"
 #include <iostream>
 
+uint8_t Quad::MAX_TASK_GEN_DEPTH = 0;
+
 Quad::Quad(const Area& area) : area(area), mass(0), body_count(0), center_of_mass({0,0}), diag_len(0) {
     top_left_quad = top_right_quad = bot_left_quad = bot_right_quad = nullptr;
     diag_len = area.diagonal_length();
