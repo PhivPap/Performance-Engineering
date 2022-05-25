@@ -27,7 +27,7 @@ struct CFG {
                     << "\n\tIterations: " << iterations << "\n\tIteration legth: "
                     << iter_len << "s\n\tTheta: " << theta << "\n\tThreads: "
                     << thread_count << "\n\tMax task generation depth: " 
-                    << max_task_gen_depth << std::endl << std::endl;
+                    << int(max_task_gen_depth) << std::endl << std::endl;
     }
 };
 
