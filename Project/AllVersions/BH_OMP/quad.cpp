@@ -79,6 +79,17 @@ void Quad::compute_bhtree_recursive(uint8_t depth){
         bot_left_quad->compute_bhtree_recursive_seq();
         bot_right_quad->compute_bhtree_recursive_seq();
     }
+
+    center_of_mass = Point::get_center_of_mass(
+        Point::get_center_of_mass(
+            top_left_quad->center_of_mass, top_left_quad->mass,
+            top_right_quad->center_of_mass, top_right_quad->mass
+        ), top_left_quad->mass + top_right_quad->mass,
+        Point::get_center_of_mass(
+            bot_left_quad->center_of_mass, bot_left_quad->mass,
+            bot_right_quad->center_of_mass, bot_right_quad->mass
+        ), bot_left_quad->mass + bot_right_quad->mass
+    );
 }
 
 void Quad::compute_bhtree_recursive_seq(void){
