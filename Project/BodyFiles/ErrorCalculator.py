@@ -1,8 +1,8 @@
 import csv
 
 # CFG
-reference_filepath = "out/naive_out.tsv"
-approx_filepath = "out/bh_naive_out.tsv"
+reference_filepath = "out/b.tsv"
+approx_filepath = "out/a.tsv"
 
 # LOGIC
 def parse_bodies(filepath):
@@ -95,7 +95,7 @@ max_vel_x_error_prcnt = round(max_vel_x_error_prcnt, 2)
 max_vel_y_error_prcnt = round(max_vel_y_error_prcnt, 2)
 
 
-print("\nInvalid bodies (error > 1% ):", invalid_bodies, "\n")
-print("AVG ERROR (%):\n  Position: [x]", avg_x_error_prcnt, "%, [y]", avg_y_error_prcnt, "%\nVelocity: [x]", avg_vel_x_error_prcnt, "%, [y]", avg_vel_y_error_prcnt, "%\n")
-print("MAX ERROR (%):\n  Position: [x]", max_x_error_prcnt, "% (body: ",  max_x_error_body, "), [y]" ,max_y_error_prcnt, "% (body: ", max_y_error_body, ")")
-print("Velocity: [x]", max_vel_x_error_prcnt, "% (body: ",max_vel_x_error_body, "), [y]", max_vel_y_error_prcnt, "% (body: ", max_vel_y_error_body, ")\n")
+print("\nInvalid bodies (error > 1%):", invalid_bodies, "\n")
+print("AVG ERROR (%):\n  Position: [x] ", avg_x_error_prcnt, "%, [y] ", avg_y_error_prcnt, "%\n  Velocity: [x] ", avg_vel_x_error_prcnt, "%, [y] ", avg_vel_y_error_prcnt, "%\n", sep="")
+print("MAX ERROR (%):\n  Position: [x] ", max_x_error_prcnt, "% (body: ",  max_x_error_body, "), [y] " ,max_y_error_prcnt, "% (body: ", max_y_error_body, ")", sep="")
+print("  Velocity: [x] ", max_vel_x_error_prcnt, "% (body: ",max_vel_x_error_body, "), [y] ", max_vel_y_error_prcnt, "% (body: ", max_vel_y_error_body, ")\n", sep="")
