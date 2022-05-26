@@ -2,8 +2,8 @@ import random
 
 
 # CFG
-universe_file = "in/test0.tsv"
-bodies = 10000
+universe_file = "in/in12500.tsv"
+bodies = 12500
 universe = ((-5e16, 5e16), (-5e16, 5e16))   # m (x, y)
 mass_range = (1e10, 1e40)                   # kg
 vel_range = (-1e6, 1e6)                     # m / s
