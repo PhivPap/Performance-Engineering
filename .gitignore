@@ -38,3 +38,6 @@ Project/naive
 Project/bh_omp
 Project/bh_naive
 As03/output
+As03/matmul_cuda
+As03/csc_cuda
+As03/csr_cuda

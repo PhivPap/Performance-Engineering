@@ -22,11 +22,11 @@ all: $(APPS)
 # spmv: spmv.c mmio.c spmv_kernel.c csr_spmv_kernel.c csc_spmv_kernel.c
 # 	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -o $@ $^ $(LFLAGS)
 
-csr_spmv: spmv.c mmio.c csr_spmv_kernel.c
-	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D CSR -o $@ $^ $(LFLAGS)
+# csr_spmv: spmv.c mmio.c csr_spmv_kernel.c
+# 	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D CSR -o $@ $^ $(LFLAGS)
 
-csc_spmv: spmv.c mmio.c csc_spmv_kernel.c
-	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D CSC -o $@ $^ $(LFLAGS)
+# csc_spmv: spmv.c mmio.c csc_spmv_kernel.c
+# 	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D CSC -o $@ $^ $(LFLAGS)
 
 # coo_spmv: spmv.c mmio.c coo_spmv_kernel.c
 # 	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D COO -o $@ $^ $(LFLAGS)
