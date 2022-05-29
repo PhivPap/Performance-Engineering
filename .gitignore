@@ -41,3 +41,5 @@ As03/output
 As03/matmul_cuda
 As03/csc_cuda
 As03/csr_cuda
+As04/spmv/csr_spmv
+As04/spmv/csc_spmv
