@@ -41,7 +41,7 @@ int main(int argc, char **argv)
     schedule(static)
     for (y = 0; y < m; y++)
         for (x = 0; x < m; x++) {
-        color = A[x + y * x];
+        color = A[x + y * m];
 #ifdef OVERHEAD
         #pragma omp critical(B)
         {
