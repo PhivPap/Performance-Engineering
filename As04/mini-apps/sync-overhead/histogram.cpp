@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include <omp.h>
 
 const int THREAD_COUNT = 4;
@@ -24,6 +25,9 @@ int main(int argc, char **argv)
   B = (float *)calloc(COLORS, sizeof(float));
   
   generate_mat(m, m, A);
+
+  struct timeval before, after;
+  gettimeofday(&before, NULL); 
   
   #pragma omp parallel \
   shared(m, A, B) \
@@ -55,4 +59,8 @@ int main(int argc, char **argv)
     }
 #endif
   }
+  
+  gettimeofday(&after, NULL);
+  printf("Execution time: %10.6f seconds \n", ((after.tv_sec + (after.tv_usec / 1000000.0)) -
+            (before.tv_sec + (before.tv_usec / 1000000.0))));
 }

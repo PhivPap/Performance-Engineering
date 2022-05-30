@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include <omp.h>
 
 const float SCALAR = 7.777;
@@ -20,10 +21,13 @@ int main(int argc, char **argv)
   
   float *A;
   int y, x;
-  int m = 1000;
+  int m = 10000;
   A = (float *)calloc(m * m, sizeof(float));
   
   generate_mat(m, m, A);
+
+  struct timeval before, after;
+  gettimeofday(&before, NULL); 
 
 #ifdef FALSESHARING
   #pragma omp parallel for \
@@ -39,4 +43,8 @@ int main(int argc, char **argv)
   for (y = 0; y < m; y++)
     for (x = 0; x < m; x++) 
       A[x + y * x] *= SCALAR;
+  
+  gettimeofday(&after, NULL);
+  printf("Execution time: %10.6f seconds \n", ((after.tv_sec + (after.tv_usec / 1000000.0)) -
+            (before.tv_sec + (before.tv_usec / 1000000.0))));
 }
