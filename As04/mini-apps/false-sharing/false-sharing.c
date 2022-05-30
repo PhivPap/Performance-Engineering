@@ -5,7 +5,7 @@
 
 const float SCALAR = 7.777;
 
-const int THREAD_COUNT = 4;
+const int THREAD_COUNT = 16;
 
 void generate_mat(int m, int n, float *A) {
   int i;
@@ -40,9 +40,9 @@ int main(int argc, char **argv)
   private(y, x) \
   schedule(static)
 #endif
-  for (y = 0; y < m; y++)
-    for (x = 0; x < m; x++) 
-      A[x + y * x] *= SCALAR;
+  for (x = 0; x < m; x++)
+    for (y = 0; y < m; y++) 
+      A[x + y * m] *= SCALAR;
   
   gettimeofday(&after, NULL);
   printf("Execution time: %10.6f seconds \n", ((after.tv_sec + (after.tv_usec / 1000000.0)) -
