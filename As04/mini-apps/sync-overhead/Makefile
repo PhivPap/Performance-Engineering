@@ -9,10 +9,10 @@ APPS = sync-overhead no-sync-overhead
 
 all: $(APPS)
 
-sync-overhead: histogram.cpp 
+sync-overhead: sum.cpp 
 	$(CXX) -fopenmp $(CXX_FLAGS) -D OVERHEAD -o $@ $^ $(LFLAGS)
 
-no-sync-overhead: histogram.cpp 
+no-sync-overhead: sum.cpp 
 	$(CXX) -fopenmp $(CXX_FLAGS) -o $@ $^ $(LFLAGS)
 
 .PHONY: clean
