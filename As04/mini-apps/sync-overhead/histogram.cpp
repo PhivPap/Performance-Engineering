@@ -3,7 +3,7 @@
 #include <sys/time.h>
 #include <omp.h>
 
-const int THREAD_COUNT = 4;
+const int THREAD_COUNT = 16;
 const int COLORS = 8;
 
 void generate_mat(int m, int n, float *A) {
