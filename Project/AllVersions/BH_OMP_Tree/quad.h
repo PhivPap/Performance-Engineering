@@ -10,7 +10,6 @@
 class Quad{
 private:
     void compute_bhtree_recursive(void);
-    static uint8_t MAX_TASK_GEN_DEPTH;
 
 public:
     static Quad* pool;
@@ -34,7 +33,6 @@ public:
     ~Quad();
     void insert_body(Body* body);
     void set_area(const Area& area);
-    static void set_max_task_generation_depth(uint8_t max_task_gen_depth);
     static void set_pool(uint32_t init_size);
     static void reset_pool(void);
     static uint32_t pool_get_idx(void);

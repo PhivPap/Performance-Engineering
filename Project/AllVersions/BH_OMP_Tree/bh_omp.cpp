@@ -20,7 +20,7 @@ struct CFG
     double iter_len = 3600;
     uint32_t thread_count = 4;
     double theta = 0.50;
-    double theta_2 = 0.25;
+    double theta_2 = theta * theta;
     uint8_t max_task_gen_depth = 1;
 
     void print()
@@ -29,9 +29,7 @@ struct CFG
         std::cout << "\tInput: " << input_file << "\n\tOutput: " << output_file
                   << "\n\tIterations: " << iterations << "\n\tIteration legth: "
                   << iter_len << "s\n\tTheta: " << theta << "\n\tThreads: "
-                  << thread_count << "\n\tMax task generation depth: "
-                  << int(max_task_gen_depth) << std::endl
-                  << std::endl;
+                  << thread_count << std::endl << std::endl;
     }
 };
 
@@ -170,7 +168,7 @@ void simulate(Body *bodies, uint32_t body_count, double time_step, uint32_t iter
     double e3 = 0;
     
     for (int i = 0; i < iterations; i++)
-    {
+    {        
         Quad::set_pool(30000);
 
         const auto cp0 = std::chrono::high_resolution_clock::now();
@@ -211,8 +209,10 @@ void parse_args(int argc, const char **argv, CFG &config)
         if ((idx = arg_parser.get_next_idx("-it_len")) > 0)
             config.iter_len = std::stod(arg_parser.get(idx));
 
-        if ((idx = arg_parser.get_next_idx("-theta")) > 0)
+        if ((idx = arg_parser.get_next_idx("-theta")) > 0){
             config.theta = std::stod(arg_parser.get(idx));
+            config.theta_2 = config.theta * config.theta;
+        }
 
         if ((idx = arg_parser.get_next_idx("-threads")) > 0)
             config.thread_count = std::stod(arg_parser.get(idx));
@@ -243,7 +243,6 @@ int main(int argc, const char **argv)
     parse_args(argc, argv, config);
     config.print();
     omp_set_num_threads(config.thread_count);
-    Quad::set_max_task_generation_depth(config.max_task_gen_depth);
     parse_input(config.input_file, bodies);
 
     const auto start = std::chrono::system_clock::now();

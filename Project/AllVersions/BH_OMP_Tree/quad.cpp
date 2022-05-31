@@ -2,7 +2,6 @@
 #include <iostream>
 #include <assert.h>
 
-uint8_t Quad::MAX_TASK_GEN_DEPTH = 0;
 Quad *Quad::pool;
 uint32_t Quad::pool_size;
 uint32_t Quad::pool_idx;
@@ -15,7 +14,7 @@ Quad::Quad(void) : mass(0), body_count(0), center_of_mass({0, 0})
 
 // this constructor is used to generate the root of the quad tree
 Quad::Quad(Body *bodies, uint32_t body_count, const Area &area) : center_of_mass({0, 0}), body_count(0),
-                                                                 mass(0), area(area)
+                                                                  mass(0), area(area)
 {
     diag_len_2 = area.diagonal_length_2();
     contained_bodies.reserve(body_count);
@@ -70,10 +69,11 @@ void Quad::compute_bhtree_recursive(void)
     bot_right_quad->set_area({center.x, area.x2, center.y, area.y2});
 
     const uint32_t n = contained_bodies.size();
-    auto cb =  contained_bodies.data();
+    auto cb = contained_bodies.data();
+
     for (uint32_t i = 0; i < n; i++)
     {
-        Body* body = cb[i];
+        Body *body = cb[i];
         const Point &coords = body->coords;
 
         if (coords.x > center.x)
@@ -108,11 +108,6 @@ void Quad::compute_bhtree_recursive(void)
         bot_left_quad->mass + bot_right_quad->mass);
 }
 
-void Quad::set_max_task_generation_depth(uint8_t max_task_gen_depth)
-{
-    MAX_TASK_GEN_DEPTH = max_task_gen_depth;
-}
-
 void Quad::set_pool(uint32_t init_size)
 {
     assert(init_size % 4 == 0);
@@ -130,5 +125,6 @@ uint32_t Quad::pool_get_idx(void)
 {
     double my_idx = pool_idx;
     pool_idx += 4;
+    assert(my_idx < pool_size); // if this asserts to true, consider resizing the pool
     return my_idx;
 }
