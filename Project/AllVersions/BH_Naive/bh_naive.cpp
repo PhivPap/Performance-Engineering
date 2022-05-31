@@ -135,17 +135,17 @@ void simulate(Body* bodies, uint32_t body_count, double time_step, uint32_t iter
     for (int i = 0; i < iterations; i++) {
         //approximations = total_visits = 0;
 
-        //const auto cp0 = std::chrono::system_clock::now();
+        const auto cp0 = std::chrono::high_resolution_clock::now();
         Area area = update_body_positions_and_get_area(bodies, body_count, time_step);
-        //const auto cp1 = std::chrono::system_clock::now();
+        const auto cp1 = std::chrono::high_resolution_clock::now();
         Quad root(bodies, body_count, area);
-        //const auto cp2 = std::chrono::system_clock::now();
+        const auto cp2 = std::chrono::high_resolution_clock::now();
         update_body_velocities(&root, bodies, body_count, time_step);
-        //const auto cp3 = std::chrono::system_clock::now();
+        const auto cp3 = std::chrono::high_resolution_clock::now();
 
-        // elapsed_p0 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp1 - cp0).count();
-        // elapsed_p1 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp2 - cp1).count();
-        // elapsed_p2 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp3 - cp2).count();
+        elapsed_p0 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp1 - cp0).count();
+        elapsed_p1 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp2 - cp1).count();
+        elapsed_p2 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp3 - cp2).count();
 
         // std::cout << "Iteration: " << i << std::endl;
         // std::cout << "\tDiagonal Length: " << area.diagonal_length() << std::endl;
@@ -153,9 +153,9 @@ void simulate(Body* bodies, uint32_t body_count, double time_step, uint32_t iter
         // std::cout << "\tAvg visits (per body): " << (double)total_visits / body_count << std::endl;
         
     }
-    // std::cout << "Update positions (per iteration): " << elapsed_p0 / (1e9 * iterations) << "s" << std::endl;
-    // std::cout << "QuadTree generation (per iteration): " << elapsed_p1 / (1e9 * iterations) << "s" << std::endl;
-    // std::cout << "Velocity computation (per iteration): " << elapsed_p2 / (1e9 * iterations) << "s" << std::endl;
+    std::cout << "Update positions (per iteration): " << elapsed_p0 / (1e9 * iterations) << "s" << std::endl;
+    std::cout << "QuadTree generation (per iteration): " << elapsed_p1 / (1e9 * iterations) << "s" << std::endl;
+    std::cout << "Velocity computation (per iteration): " << elapsed_p2 / (1e9 * iterations) << "s" << std::endl;
 }
 
 void parse_args(int argc, const char** argv, CFG& config){

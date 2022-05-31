@@ -5,7 +5,7 @@
 
 /* Point methods */
 
-// Point::Point(void): x(0), y(0) {}
+Point::Point(void) {}
 
 Point::Point(double x, double y) : x(x), y(y) {}
 
@@ -14,8 +14,8 @@ Point::Point(const Point& p){
     y = p.y;
 }
 
-double Point::distance_to(const Point& p) const {
-    return std::sqrt((x - p.x) * (x - p.x) + (y - p.y) * (y - p.y));
+double Point::distance_to_2(const Point& p) const {
+    return (x - p.x) * (x - p.x) + (y - p.y) * (y - p.y);
 }
 
 Point Point::get_center_of_mass(const Point& p1, double mass1, const Point& p2, double mass2){
@@ -27,7 +27,7 @@ Point Point::get_center_of_mass(const Point& p1, double mass1, const Point& p2, 
 
 /* Area methods */
 
-// Area::Area(void): x1(0), x2(0), y1(0), y2(0) {}
+Area::Area(void) {}
 
 Area::Area(double x1, double x2, double y1, double y2) :
     x1(x1), x2(x2), y1(y1), y2(y2) {}
@@ -40,8 +40,8 @@ double Area::side_length() const {
     return x2 - x1;
 }
 
-double Area::diagonal_length() const {
-    return sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+double Area::diagonal_length_2() const {
+    return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
 }
 
 Point Area::get_center() const {
