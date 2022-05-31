@@ -13,20 +13,17 @@ ifneq ($(SERIAL), 1)
 	CXX_FLAGS += $(PAR_FLAG)
 endif
 
-APPS = matmul_cuda csr_cuda csc_cuda
+APPS = csr_spmv csc_spmv
 
 .PHONY: all
 
 all: $(APPS)
 
-matmul_cuda: matmul_cuda.cu mmio.cpp MatrixParser/matrixparser.cpp
-	nvcc -O3 -Xptxas -O3 -o $@ $^
+csr_spmv: spmv.c mmio.c csr_spmv_kernel.c
+	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D CSR -o $@ $^ $(LFLAGS)
 
-csr_cuda: csr.cu mmio.cpp
-	nvcc -O3 -Xptxas -O3 -o $@ $^
-
-csc_cuda: csc.cu mmio.cpp
-	nvcc -O3 -Xptxas -O3 -o $@ $^
+csc_spmv: spmv.c mmio.c csc_spmv_kernel.c
+	$(CXX) $(CXX_FLAGS) $(GENERATE) $(TIMING) -D CSC -o $@ $^ $(LFLAGS)
 
 .PHONY: clean
 clean:

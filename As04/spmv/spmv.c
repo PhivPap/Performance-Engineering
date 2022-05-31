@@ -152,7 +152,7 @@ int read_mat(int *m, int *n, int *nzA, FILE* fa, int *is_pattern) {
   return 0;
 }
 
-// #ifdef CSR
+#ifdef CSR
 /*
  * Converts matrix to CSR format. 
  * returns the number of nonZero's found during conversion
@@ -196,7 +196,7 @@ void print_mat_csr(int m, int nzA, int *sA_rows, int *sA_col_idx, float *sA_vals
 
 }
 
-// #endif
+#endif
 
 #ifdef CSC
 /*

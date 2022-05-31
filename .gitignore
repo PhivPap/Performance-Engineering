@@ -37,3 +37,15 @@ Project/bh_omp.exe
 Project/naive
 Project/bh_omp
 Project/bh_naive
+As03/output
+As03/matmul_cuda
+As03/csc_cuda
+As03/csr_cuda
+As04/spmv/csr_spmv
+As04/spmv/csc_spmv
+As04/mini-apps/false-sharing/false-sharing-on
+As04/mini-apps/false-sharing/false-sharing-off
+As04/mini-apps/load-imbalance/load-balance
+As04/mini-apps/load-imbalance/load-imbalance
+As04/mini-apps/sync-overhead/sync-overhead
+As04/mini-apps/sync-overhead/no-sync-overhead
