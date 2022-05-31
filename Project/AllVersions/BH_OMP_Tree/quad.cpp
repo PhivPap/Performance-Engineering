@@ -1,15 +1,18 @@
 #include "quad.h"
 #include <iostream>
 #include <assert.h>
+#include <chrono>
 
 Quad *Quad::pool;
 uint32_t Quad::pool_size;
 uint32_t Quad::pool_idx;
+double Quad::total_insertion_time = 0;
+uint64_t Quad::total_insertions = 0;
 
 Quad::Quad(void) : mass(0), body_count(0), center_of_mass({0, 0})
 {
-    contained_bodies.reserve(100);
-    top_left_quad = top_right_quad = bot_left_quad = bot_right_quad = nullptr;
+    contained_bodies.reserve(40);
+    //top_left_quad = top_right_quad = bot_left_quad = bot_right_quad = nullptr;
 }
 
 // this constructor is used to generate the root of the quad tree
@@ -71,6 +74,7 @@ void Quad::compute_bhtree_recursive(void)
     const uint32_t n = contained_bodies.size();
     auto cb = contained_bodies.data();
 
+    const auto start = std::chrono::high_resolution_clock::now();
     for (uint32_t i = 0; i < n; i++)
     {
         Body *body = cb[i];
@@ -91,6 +95,9 @@ void Quad::compute_bhtree_recursive(void)
                 top_left_quad->insert_body(body);
         }
     }
+    const auto end = std::chrono::high_resolution_clock::now();
+    total_insertion_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
+    total_insertions += n;
 
     top_left_quad->compute_bhtree_recursive();
     top_right_quad->compute_bhtree_recursive();
@@ -110,7 +117,6 @@ void Quad::compute_bhtree_recursive(void)
 
 void Quad::set_pool(uint32_t init_size)
 {
-    assert(init_size % 4 == 0);
     pool_size = init_size;
     pool = new Quad[init_size];
 }

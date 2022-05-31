@@ -10,6 +10,7 @@
 #include <assert.h>
 #include <algorithm>
 #include "float.h"
+#include <functional>
 
 // default values can be altered with the main args
 struct CFG
@@ -21,22 +22,21 @@ struct CFG
     uint32_t thread_count = 4;
     double theta = 0.50;
     double theta_2 = theta * theta;
-    uint8_t max_task_gen_depth = 1;
+    uint32_t quad_pool_size = 30000;
 
     void print()
     {
         std::cout << "Configuration:" << std::endl;
         std::cout << "\tInput: " << input_file << "\n\tOutput: " << output_file
-                  << "\n\tIterations: " << iterations << "\n\tIteration legth: "
+                  << "\n\tIterations: " << iterations << "\n\tIteration length: "
                   << iter_len << "s\n\tTheta: " << theta << "\n\tThreads: "
-                  << thread_count << std::endl << std::endl;
+                  << thread_count << "\n\tQuad pool size: " << quad_pool_size 
+                  << std::endl << std::endl;
     }
 };
 
 const double G = 6.67e-11; // Gravitational constant
 CFG config;
-double times[32];
-double repetitions[32];
 
 void parse_input(const std::string &input_path, std::vector<Body> &bodies)
 {
@@ -163,13 +163,15 @@ void update_body_velocities(Quad *root, Body *bodies, uint32_t body_count, doubl
 
 void simulate(Body *bodies, uint32_t body_count, double time_step, uint32_t iterations)
 {
+    double e0 = 0;
     double e1 = 0;
     double e2 = 0;
     double e3 = 0;
     
     for (int i = 0; i < iterations; i++)
-    {        
-        Quad::set_pool(30000);
+    {   
+        const auto cp = std::chrono::high_resolution_clock::now();
+        Quad::set_pool(config.quad_pool_size);
 
         const auto cp0 = std::chrono::high_resolution_clock::now();
         Area area = update_body_positions_and_get_area(bodies, body_count, time_step);
@@ -179,6 +181,7 @@ void simulate(Body *bodies, uint32_t body_count, double time_step, uint32_t iter
         update_body_velocities(&root, bodies, body_count, time_step);
         const auto cp3 = std::chrono::high_resolution_clock::now();
 
+        e0 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp0 - cp).count();
         e1 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp1 - cp0).count();
         e2 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp2 - cp1).count();
         e3 += std::chrono::duration_cast<std::chrono::nanoseconds>(cp3 - cp2).count();     
@@ -186,9 +189,13 @@ void simulate(Body *bodies, uint32_t body_count, double time_step, uint32_t iter
         Quad::reset_pool();   
     }
 
+    std::cout << "Quad pool creation: " << e0 / (1e9 * iterations) << std::endl;
+    std::cout << "Quad pool creation per quad: " << e0 / (1e9 * iterations * config.quad_pool_size) << std::endl;
     std::cout << "Update positions (per iteration): " << e1 / (1e9 * iterations) << std::endl;
     std::cout << "QuadTree generation (per iteration): " << e2 / (1e9 * iterations) << std::endl;
     std::cout << "Velocity computation (per iteration): " << e3 / (1e9 * iterations) <<  std::endl;
+    std::cout << "Body insertion time: " << Quad::total_insertion_time / Quad::total_insertions << std::endl;
+    std::cout << "POOL + TREE GEN: " << (e0 + e2) / (1e9 * iterations) << std::endl;
 }
 
 void parse_args(int argc, const char **argv, CFG &config)
@@ -217,8 +224,11 @@ void parse_args(int argc, const char **argv, CFG &config)
         if ((idx = arg_parser.get_next_idx("-threads")) > 0)
             config.thread_count = std::stod(arg_parser.get(idx));
 
-        if ((idx = arg_parser.get_next_idx("-task_depth")) > 0)
-            config.max_task_gen_depth = std::stoi(arg_parser.get(idx));
+        if ((idx = arg_parser.get_next_idx("-quad_pool")) > 0) {
+            config.quad_pool_size = std::stoi(arg_parser.get(idx));
+            assert(config.quad_pool_size % 4 == 0);
+        }
+            
     }
     catch (const std::string &ex)
     {

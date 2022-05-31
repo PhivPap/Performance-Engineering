@@ -12,6 +12,7 @@ private:
     void compute_bhtree_recursive(void);
 
 public:
+    //static double elapsed0, elapsed1, counter;
     Area area; 
     uint32_t body_count;
     double mass, diag_len_2;

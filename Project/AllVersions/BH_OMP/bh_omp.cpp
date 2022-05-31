@@ -14,7 +14,7 @@
 // default values can be altered with the main args
 struct CFG
 {
-    std::string input_file = "BodyFiles/in/def_in.tsv";
+    std::string input_file = "BodyFiles/in/in10000.tsv";
     std::string output_file = "BodyFiles/out/bh_omp_out.tsv";
     uint32_t iterations = 50;
     double iter_len = 3600;
@@ -37,8 +37,6 @@ struct CFG
 
 const double G = 6.67e-11; // Gravitational constant
 CFG config;
-double times[32];
-double repetitions[32];
 
 void parse_input(const std::string &input_path, std::vector<Body> &bodies)
 {
@@ -75,7 +73,6 @@ void write_output(const std::string &output_path, const std::vector<Body> &bodie
 Area update_body_positions_and_get_area(Body *bodies, uint32_t body_count, double time_step)
 {
     Area area(DBL_MAX, DBL_MIN, DBL_MAX, DBL_MIN);
-
     for (uint32_t i = 0; i < body_count; i++)
     {
         Body &body = bodies[i];
@@ -89,6 +86,7 @@ Area update_body_positions_and_get_area(Body *bodies, uint32_t body_count, doubl
         area.y1 = std::min(area.y1, body.coords.y);
         area.y2 = std::max(area.y2, body.coords.y);
     }
+    
     return area;
 }
 
@@ -102,7 +100,6 @@ void compute_body2body_attraction(const Body *body1, const Body *body2, double &
     const double F = (G * body1->mass * body2->mass) / distance_2;
     Fx += F * (body2->coords.x - body1->coords.x) / distance;
     Fy += F * (body2->coords.y - body1->coords.y) / distance;
-
 }
 
 void compute_body2quad_attraction(const Body *body, const Quad *quad, double &Fx, double &Fy, double distance_2)
@@ -112,7 +109,6 @@ void compute_body2quad_attraction(const Body *body, const Quad *quad, double &Fx
     const double F = (G * body->mass * quad->mass) / distance_2;
     Fx += F * (quad->center_of_mass.x - body->coords.x) / distance;
     Fy += F * (quad->center_of_mass.y - body->coords.y) / distance;
-
 }
 
 void compute_body_forces(Quad *quad, Body *body, double &Fx, double &Fy)
@@ -131,8 +127,6 @@ void compute_body_forces(Quad *quad, Body *body, double &Fx, double &Fy)
     const auto quad_diag_2 = quad->diag_len_2;
     const auto distance_2 = body->coords.distance_to_2(quad->center_of_mass);
 
-    
-
     if (quad_diag_2 < config.theta_2 * distance_2)
     {
         compute_body2quad_attraction(body, quad, Fx, Fy, distance_2);
@@ -148,9 +142,9 @@ void compute_body_forces(Quad *quad, Body *body, double &Fx, double &Fy)
 
 void update_body_velocities(Quad *root, Body *bodies, uint32_t body_count, double time_step)
 {
-#pragma omp parallel for default(none)                \
+    #pragma omp parallel for default(none)            \
     firstprivate(root, bodies, body_count, time_step) \
-        schedule(dynamic)
+    schedule(dynamic)
     for (uint32_t i = 0; i < body_count; i++)
     {
         Body &body = bodies[i];
@@ -158,8 +152,6 @@ void update_body_velocities(Quad *root, Body *bodies, uint32_t body_count, doubl
         compute_body_forces(root, &body, Fx, Fy);
         body.vel_x += (Fx / body.mass) * time_step;
         body.vel_y += (Fy / body.mass) * time_step;
-
-
     }
 }
 
@@ -241,13 +233,14 @@ int main(int argc, const char **argv)
     omp_set_num_threads(config.thread_count);
     parse_input(config.input_file, bodies);
 
-    const auto start = std::chrono::system_clock::now();
+    const auto start = std::chrono::high_resolution_clock::now();
     simulate(bodies.data(), bodies.size(), config.iter_len, config.iterations);
-    const auto end = std::chrono::system_clock::now();
+    const auto end = std::chrono::high_resolution_clock::now();
 
     const auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count() / 1e9;
     std::cout << "Seconds: " << elapsed << std::endl;
     std::cout << "Seconds per iteration: " << elapsed / config.iterations << std::endl;
-
     write_output(config.output_file, bodies);
+    // std::cout << "Subtree generation: " << Quad::elapsed0 / Quad::counter << "ns" << std::endl;
+    // std::cout << "Body insertion: " << Quad::elapsed1 / Quad::counter << "ns" << std::endl;
 }

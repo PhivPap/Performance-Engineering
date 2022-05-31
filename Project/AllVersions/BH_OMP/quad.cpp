@@ -1,5 +1,11 @@
 #include "quad.h"
 #include <iostream>
+#include <chrono>
+
+// double Quad::elapsed0 = 0.0;
+// double Quad::elapsed1 = 0.0;
+// double Quad::counter = 0.0;
+
 
 Quad::Quad(const Area& area) : area(area), mass(0), body_count(0), center_of_mass({0,0}) {
     top_left_quad = top_right_quad = bot_left_quad = bot_right_quad = nullptr;
@@ -36,10 +42,15 @@ void Quad::compute_bhtree_recursive(void){
         return;
 
     const Point& center = area.get_center();
+
+    //const auto p0 = std::chrono::high_resolution_clock::now();
+
     top_left_quad = new Quad({ area.x1, center.x, area.y1, center.y });
     top_right_quad = new Quad({ center.x, area.x2, area.y1, center.y });
     bot_left_quad = new Quad({ area.x1, center.x, center.y, area.y2 });
     bot_right_quad = new Quad({ center.x, area.x2, center.y, area.y2 });
+
+    //const auto p1 = std::chrono::high_resolution_clock::now();
 
     for (Body* body : contained_bodies){
         const Point& coords = body->coords;
@@ -58,6 +69,17 @@ void Quad::compute_bhtree_recursive(void){
         }
     }
 
+    //const auto p2 = std::chrono::high_resolution_clock::now();
+
+    //elapsed0 += std::chrono::duration_cast<std::chrono::nanoseconds>(p1 - p0).count();
+    //elapsed1 += std::chrono::duration_cast<std::chrono::nanoseconds>(p2 - p1).count() / contained_bodies.size();
+    //counter += 1;
+
+        // std::cout << "Subtree generation: " << elapsed0 << "ns" << std::endl;
+        // std::cout << "Body insertion: " << elapsed1 / contained_bodies.size() << "ns" << std::endl;
+
+
+    //level++;
     top_left_quad->compute_bhtree_recursive();
     top_right_quad->compute_bhtree_recursive();
     bot_left_quad->compute_bhtree_recursive();
