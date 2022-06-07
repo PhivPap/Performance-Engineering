@@ -1,24 +1,18 @@
 #include "quad.h"
-#include <iostream>
 #include <assert.h>
 #include <chrono>
 
 Quad *Quad::pool;
 uint32_t Quad::pool_size;
 uint32_t Quad::pool_idx;
-double Quad::total_insertion_time = 0;
-uint64_t Quad::total_insertions = 0;
 
-Quad::Quad(void) : mass(0), body_count(0), center_of_mass({0, 0})
-{
+Quad::Quad(void) : mass(0), body_count(0), center_of_mass({0, 0}){
     contained_bodies.reserve(40);
-    //top_left_quad = top_right_quad = bot_left_quad = bot_right_quad = nullptr;
 }
 
 // this constructor is used to generate the root of the quad tree
 Quad::Quad(Body *bodies, uint32_t body_count, const Area &area) : center_of_mass({0, 0}), body_count(0),
-                                                                  mass(0), area(area)
-{
+                                                                  mass(0), area(area) {
     diag_len_2 = area.diagonal_length_2();
     contained_bodies.reserve(body_count);
     for (uint32_t i = 0; i < body_count; i++)
@@ -27,31 +21,23 @@ Quad::Quad(Body *bodies, uint32_t body_count, const Area &area) : center_of_mass
     compute_bhtree_recursive();
 }
 
-Quad::~Quad()
-{
-    // if (body_count > 1)
-    //     delete[] top_left_quad;
-}
+Quad::~Quad() {}
 
-void Quad::set_area(const Area &area)
-{
+void Quad::set_area(const Area &area){
     this->area = area;
     diag_len_2 = area.diagonal_length_2();
 }
 
-void Quad::insert_body(Body *body)
-{
+void Quad::insert_body(Body *body){
     contained_bodies.push_back(body);
     mass += body->mass;
     body_count++;
 }
 
-void Quad::compute_bhtree_recursive(void)
-{
+void Quad::compute_bhtree_recursive(void){
     if (body_count == 0)
         return;
-    else if (body_count == 1)
-    {
+    else if (body_count == 1){
         center_of_mass = contained_bodies[0]->coords;
         return;
     }
@@ -74,30 +60,23 @@ void Quad::compute_bhtree_recursive(void)
     const uint32_t n = contained_bodies.size();
     auto cb = contained_bodies.data();
 
-    const auto start = std::chrono::high_resolution_clock::now();
-    for (uint32_t i = 0; i < n; i++)
-    {
+    for (uint32_t i = 0; i < n; i++) {
         Body *body = cb[i];
         const Point &coords = body->coords;
 
-        if (coords.x > center.x)
-        {                            // right
-            if (coords.y > center.y) // bottom
+        if (coords.x > center.x){
+            if (coords.y > center.y)
                 bot_right_quad->insert_body(body);
-            else // top
+            else
                 top_right_quad->insert_body(body);
         }
-        else
-        {                            // left
-            if (coords.y > center.y) // bottom
+        else {
+            if (coords.y > center.y)
                 bot_left_quad->insert_body(body);
-            else // top
+            else
                 top_left_quad->insert_body(body);
         }
     }
-    const auto end = std::chrono::high_resolution_clock::now();
-    total_insertion_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-    total_insertions += n;
 
     top_left_quad->compute_bhtree_recursive();
     top_right_quad->compute_bhtree_recursive();
@@ -115,22 +94,20 @@ void Quad::compute_bhtree_recursive(void)
         bot_left_quad->mass + bot_right_quad->mass);
 }
 
-void Quad::set_pool(uint32_t init_size)
-{
+void Quad::set_pool(uint32_t init_size){
     pool_size = init_size;
     pool = new Quad[init_size];
 }
 
-void Quad::reset_pool(void)
-{
+void Quad::reset_pool(void){
     delete[] pool;
     pool_idx = 0;
 }
 
-uint32_t Quad::pool_get_idx(void)
-{
+uint32_t Quad::pool_get_idx(void){
     double my_idx = pool_idx;
     pool_idx += 4;
-    assert(my_idx < pool_size); // if this asserts to true, consider resizing the pool
+    // if this asserts to true, consider resizing the pool. See main "config.quad_pool_size = ..."
+    assert(my_idx < pool_size); 
     return my_idx;
 }

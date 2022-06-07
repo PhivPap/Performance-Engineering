@@ -7,7 +7,7 @@
 #include <inttypes.h>
 
 // The main quadtree class
-class Quad{
+class Quad {
 private:
     void compute_bhtree_recursive(void);
 
@@ -15,8 +15,6 @@ public:
     static Quad* pool;
     static uint32_t pool_size;
     static uint32_t pool_idx;
-    static double total_insertion_time;
-    static uint64_t total_insertions;
 
     Area area; 
     uint32_t body_count;
