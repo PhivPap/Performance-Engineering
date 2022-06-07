@@ -57,7 +57,7 @@ Some sample executions:
 ```
 
 **Note:** Before running the parallel versions (*bh_omp*, *bh_omp_tree*), it is recommended to pin the OpenMP threads to the cores of the processor. On linux, this can be done with:
-``export OMP_PROC_BIND=close``
+``export OMP_PROC_BIND=true``
 
 
 ### Simulation Error Measurement
