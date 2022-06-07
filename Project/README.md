@@ -5,7 +5,7 @@ University of Amsterdam - June 2022
 - Foivos Papapanagiotakis-Bousy
 - Andre Palheiros da Silva
 - Tim van Kemenade
-- Dymitr Lubczy
+- Dymitr Lubczyk
 
 
 ## Usage 
