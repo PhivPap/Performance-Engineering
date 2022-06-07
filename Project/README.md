@@ -1,4 +1,4 @@
-# Peformance Engineering Project
+# Peformance Engineering: 2D Barnes-Hut Approximation
 University of Amsterdam - June 2022
 
 ## Authors: 
