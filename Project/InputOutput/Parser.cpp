@@ -7,7 +7,6 @@
 
 IO::Parser::Parser(const std::string& path){
     std::string line, id;
-    double mass, x, y, vel_x, vel_y;
     input_file = std::ifstream(path);
 
     if (!input_file.is_open()) {

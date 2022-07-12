@@ -23,6 +23,5 @@ void IO::Writer::write_body(const IO::Body& io_body){
         << io_body.x << '\t'
         << io_body.y << '\t'
         << io_body.vel_x << '\t'
-        << io_body.vel_y << '\t'
-        << std::endl;
+        << io_body.vel_y << std::endl;
 }
